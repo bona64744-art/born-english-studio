@@ -459,17 +459,19 @@ body.dragging .pdrop b::after{content:" — 놓으면 읽기 시작합니다"}
 /* ===== 디자인 다듬기 (Class Material Studio) ===== */
 :root{--shadow-s:0 1px 2px rgba(16,24,40,.05);--shadow-m:0 1px 2px rgba(16,24,40,.04),0 6px 18px rgba(16,24,40,.06);--accent-2:#5B7CFF;--rad:14px}
 body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var(--blue) 9%,transparent),transparent 70%),var(--bg);background-attachment:fixed}
-.side{background:linear-gradient(185deg,color-mix(in srgb,var(--side-2) 70%,var(--side)) -10%,var(--side) 45%,color-mix(in srgb,var(--side) 88%,#000) 100%);border-right:1px solid rgba(255,255,255,.04)}
+.side{--side:#0E2B20;--side-2:#17402F;--side-ink:#D3E8DC;--side-mute:#7FA896}
+.side{background:linear-gradient(185deg,color-mix(in srgb,var(--side-2) 70%,var(--side)) -10%,var(--side) 45%,color-mix(in srgb,var(--side) 88%,#000) 100%);border-right:1px solid rgba(255,255,255,.05)}
+.side .usage{background:rgba(255,255,255,.05)}
 .brand{padding:22px 18px 22px;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:6px}
 .brand img{width:40px;height:40px;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .brand b{font-size:16px;font-weight:700;letter-spacing:-0.02em}
-.brand small{display:block;margin-top:3px;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8FA6FF}
+.brand small{display:block;margin-top:3px;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#7EE2B0}
 .nav h6{margin:20px 10px 7px;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--side-mute)}
 .nav button{border-radius:10px;padding:9px 11px;transition:background .15s,color .15s,transform .15s}
 .nav button:hover{background:rgba(255,255,255,.07);color:#fff}
 .nav button svg{opacity:.7;transition:opacity .15s}
 .nav button:hover svg,.nav button[aria-current="page"] svg{opacity:1}
-.nav button[aria-current="page"]{background:linear-gradient(90deg,rgba(124,156,255,.22),rgba(124,156,255,.07));box-shadow:inset 3px 0 0 #7C9CFF;font-weight:600}
+.nav button[aria-current="page"]{background:linear-gradient(90deg,rgba(94,214,160,.24),rgba(94,214,160,.07));box-shadow:inset 3px 0 0 #5ED6A0;font-weight:600}
 .top{height:60px;background:color-mix(in srgb,var(--panel) 86%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);box-shadow:var(--shadow-s)}
 .crumb b{font-weight:650}
 .who .av{background:linear-gradient(135deg,var(--accent-2),var(--violet));color:#fff;box-shadow:0 2px 8px rgba(91,124,255,.35)}
