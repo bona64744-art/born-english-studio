@@ -456,6 +456,7 @@ body.dragging .pdrop b::after{content:" — 놓으면 읽기 시작합니다"}
 .tbday em{display:block;font-style:normal;color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4;font-family:'Source Serif 4',serif}
 
 
+.pstypes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 14px}.pstypes .chk{margin:0}
 /* ===== 디자인 다듬기 (Class Material Studio) ===== */
 :root{--shadow-s:0 1px 2px rgba(16,24,40,.05);--shadow-m:0 1px 2px rgba(16,24,40,.04),0 6px 18px rgba(16,24,40,.06);--accent-2:#5B7CFF;--rad:14px}
 body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var(--blue) 9%,transparent),transparent 70%),var(--bg);background-attachment:fixed}
@@ -516,6 +517,13 @@ body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var
 .q{padding-bottom:8mm}
 .q-src{font-size:7.4pt;color:#8a9099;margin-bottom:.8mm}
 .q-src .lvl{display:inline-block;margin-left:1.6mm;padding:0 1.3mm;border:.25mm solid #1E4BD2;border-radius:.8mm;color:#1E4BD2;font-size:6.6pt;line-height:1.5}
+/* ps */
+.page.ps .q-src{display:none}
+.page.ps .q .q-passage{font-size:8.4pt;line-height:1.5}
+.page.ps .ps-pass .q-passage{font-size:9pt;line-height:1.55;text-align:left}
+.ps-pass{border:.3mm solid #1E4BD2;border-radius:1.2mm;padding:2.6mm 3.2mm;background:#f5f7ff}
+.ps-h{display:flex;align-items:baseline;gap:2.4mm;margin-bottom:1.6mm}.ps-h b{font-size:14pt;color:#1E4BD2}.ps-h span{font-size:8.6pt;color:#555}
+.ps-i{font-size:9.4pt;font-weight:600;margin-bottom:1.6mm}
 .pg-brand .lv{display:inline-block;margin-left:2mm;padding:.2mm 1.8mm;background:#1E4BD2;color:#fff;border-radius:.8mm;font-size:8pt;font-weight:600;vertical-align:.4mm}
 .q-stem{font-size:9.7pt;font-weight:700;line-height:1.45;margin-bottom:3mm;letter-spacing:-.01em}
 .q-stem b{margin-right:.6mm}
@@ -1619,7 +1627,7 @@ const LS = {
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){return} try{syncTouch(k)}catch(e){}}
 };
 /* ---------------- 기기 간 동기화: 초안·진행 중 작업·설정을 서버(db)에도 저장해 다른 컴퓨터에서 이어서 쓴다 ---------------- */
-const SYNC_KEYS=new Set(["bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
+const SYNC_KEYS=new Set(["bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
   "bj-wkbk-last","bj-cls-last","bj-ana-last","bj-basic-last","bj-exam-draft","bj-exam-last","bj-hs-draft","bj-hs-last","bj-cr-draft","bj-cr-last","bj-tb-draft","bj-tb-last","bj-ext","bj-ext-mid","jp-set","bj-bookgrammar","bj-cls-wb","bj-wkbk-acts","bj-settings","bj-att","bj-lg"]);
 const SYNC_TS_KEY="bj-sync-ts"; const _syncT={};
 function syncTs(){ try{return JSON.parse(localStorage.getItem(SYNC_TS_KEY)||"{}")||{}}catch(e){return {}} }
@@ -1680,7 +1688,7 @@ const anaDraft = LS.get("bj-ana-draft",null);
 const state = {
   view: saved.view || "gen",
   level: saved.level==="mid"?"mid":"high",
-  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new"},
+  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new"},
   genSel: new Set(),
   counts: saved.counts || {...DEFAULT_COUNTS,...MID_DEFAULT},
   folded: saved.folded || {},
@@ -1771,7 +1779,7 @@ function renderTable(key){
 }
 function tableCount(key){const n=filledRows(key).length;return `${n}/${rowsOf(key).length}개 입력 · 최대 30개`}
 /* 머리말 자동 입력: 불러온 지문의 시험 이름으로 채우되, 직접 고친 값은 건드리지 않습니다 */
-const KICK_SEL={ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
+const KICK_SEL={ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
 function autoKick(key){
   const st=state[key]; if(!st||!st.rows||!KICK_SEL[key]) return;
   const el=document.querySelector(`[${KICK_SEL[key]}="kicker"]`); if(el&&document.activeElement===el) return;
@@ -1787,10 +1795,10 @@ function saveDraft(key){
   if(key==="hs"){ hsSaveDraft(); return; }
   if(key==="cr"){ crSaveDraft(); return; }
   state[key].savedAt=Date.now();
-  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
+  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
   const el=document.querySelector(`[data-saved="${key}"]`); if(el) el.textContent=`마지막 임시 저장: ${fmtTime(state[key].savedAt)}`;
   const c=document.querySelector(`[data-count="${key}"]`); if(c) c.textContent=tableCount(key);
-  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally();
+  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally();
 }
 function addRows(key,items){
   const rows=rowsOf(key);
@@ -2758,14 +2766,14 @@ function marked(raw,abc){
 }
 function optsHTML(opts,ko){return `<ol class="opts ${ko?"ko":"en"}">${opts.map((o,i)=>`<li><span class="cn">${CN[i]}</span><span>${esc(o)}</span></li>`).join("")}</ol>`}
 function isKoOpts(q){const t=T[q.type]; if(q.lang) return q.lang==="ko"; return t.opt==="ko"||(t.kind==="mc"&&(q.options||[]).every(hasKo))}
-function qHTML(q,n){
-  const t=T[q.type]; let b="";
+function qHTML(q,n,opt){
+  const t=T[q.type]; let b=""; const np=!!(opt&&opt.noPass);
   switch(t.kind){
-    case "mc": b=`<div class="q-passage">${inline(q.orig)}</div>${optsHTML(q.options,isKoOpts(q))}`;break;
+    case "mc": b=`${np?"":`<div class="q-passage">${inline(q.orig)}</div>`}${optsHTML(q.options,isKoOpts(q))}`;break;
     case "blank": case "implication": b=`<div class="q-passage">${marked(q.passage)}</div>${optsHTML(q.options,false)}`;break;
     case "summary":{
       const s=esc(q.summary).replace(/\(A\)/,'<span class="sb">(A)</span>').replace(/\(B\)/,'<span class="sb">(B)</span>');
-      b=`<div class="q-passage">${inline(q.orig)}</div><div class="q-arrow">↓</div><div class="q-sum">${s}</div>
+      b=`${np?"":`<div class="q-passage">${inline(q.orig)}</div><div class="q-arrow">↓</div>`}<div class="q-sum">${s}</div>
       <table class="pairs"><tr><th></th><th>(A)</th><th></th><th>(B)</th></tr>${q.options.map((o,i)=>`<tr><td class="c cn">${CN[i]}</td><td>${esc(o[0])}</td><td class="d">……</td><td>${esc(o[1])}</td></tr>`).join("")}</table>`;break;}
     case "refmc": case "multi":
       b=`<div class="q-passage">${marked(q.passage,true)}</div>`+(t.kind==="multi"?optsHTML(q.options,false):`<div class="ogrid abc">${LB.map((l,i)=>`<span><span class="cn">${CN[i]}</span> ${l}</span>`).join("")}</div>`);break;
@@ -2876,12 +2884,12 @@ function orderedQs(){
     : (pn(a)-pn(b))||(ci(a)-ci(b))||(ti(a.type)-ti(b.type))||(lv(a)-lv(b)));
 }
 let pxPerMm=3.7795;
-function measureSetup(){
-  const m=$("#measure"); m.innerHTML=`<div class="page" style="position:static"><div class="col" id="mcol" style="width:87mm"></div><div id="mref" style="height:100mm"></div></div>`;
+function measureSetup(ps){
+  const m=$("#measure"); m.innerHTML=`<div class="page${ps?" ps":""}" style="position:static"><div class="col" id="mcol" style="width:87mm"></div><div id="mref" style="height:100mm"></div></div>`;
   pxPerMm = $("#mref").getBoundingClientRect().height/100 || 3.7795;
 }
-function paginate(blocks,kind){
-  measureSetup();
+function paginate(blocks,kind,popt){
+  measureSetup(!!popt);
   const col=$("#mcol"); const colH=252*pxPerMm;
   const heights=blocks.map(b=>{col.innerHTML=b.html;let h=col.scrollHeight; if(h>colH){col.innerHTML=`<div class="squeeze">${b.html}</div>`;h=col.scrollHeight;b.squeeze=true} return h});
   col.innerHTML="";
@@ -2890,13 +2898,14 @@ function paginate(blocks,kind){
   newCol();
   blocks.forEach((b,i)=>{
     const h=heights[i];
+    if(b.br&&(page.cols[0].length||page.cols[1].length)){ side=1; newCol(); }
     if(used>0 && used+h>colH+1) newCol();
     page.cols[side].push(b.squeeze?`<div class="squeeze">${b.html}</div>`:b.html);
     if(!page.cat) page.cat=b.cat;
     used+=h;
   });
   const s=state.set, academy=state.academy.trim();
-  return pages.map((p,i)=>`<div class="page"><div class="pg-head"><div class="pg-brand"><b>${s.level==="mid"?"중등 변형문제":"변형문제"}</b>${kind==="a"?"<span>정답 및 해설</span>":""}${state.version!=="all"?`<span class="lv">${state.version} 버전</span>`:""}</div><div class="pg-src">${esc(s.title)}${academy?`<i>|</i>${esc(academy)}`:""}</div></div><div class="pg-body"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div><div class="pg-foot"><span>${esc(p.cat||"")}</span><span class="cp">${academy?esc(academy)+" 수업용 자료입니다. 무단 배포를 금합니다.":"수업용 자료입니다. 무단 배포를 금합니다."}</span><span>${i+1}</span></div></div>`);
+  return pages.map((p,i)=>`<div class="page${popt?" ps":""}"><div class="pg-head"><div class="pg-brand"><b>${popt?"지문별 시험지":s.level==="mid"?"중등 변형문제":"변형문제"}</b>${kind==="a"?"<span>정답 및 해설</span>":""}${!popt&&state.version!=="all"?`<span class="lv">${state.version} 버전</span>`:""}</div><div class="pg-src">${esc(s.title)}${academy?`<i>|</i>${esc(academy)}`:""}</div></div><div class="pg-body"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div><div class="pg-foot"><span>${esc(p.cat||"")}</span><span class="cp">${academy?esc(academy)+" 수업용 자료입니다. 무단 배포를 금합니다.":"수업용 자료입니다. 무단 배포를 금합니다."}</span><span>${i+1}</span></div></div>`);
 }
 function buildPages(kind){
   const list=orderedQs().map((q,i)=>({q,n:i+1}));
@@ -3299,7 +3308,7 @@ function assembleSet(){
   const qs=state.units.flatMap(u=>u.questions||[]);
   state.set={...state.set,questions:qs,demo:false};
   LS.set("jp-set",state.set);
-  if(state.view==="gen"&&state.sub.gen==="result") renderSheets();
+  if((state.view==="gen"&&state.sub.gen==="result")||(state.view==="ps"&&state.sub.ps==="result")) renderSheets();
   const c=$("#cnt-result"); if(c) c.textContent=orderedQs().length||"";
 }
 function startRun(){
@@ -3322,6 +3331,78 @@ async function createDraftMaterial(total){
     const m=await saveMaterial("variant",state.set.title,packed);
     if(m){ state.set.materialId=m.id; await updateMaterial(m,{status:"processing"}); renderView(); }
   }catch(e){}
+}
+
+
+/* ================= 지문별 시험지 (지문 → 그 지문의 문제, 유형은 중요도 순) ================= */
+const PS_TYPES=[["topic","글의 주제","하","en"],["gist","글의 요지","하",""],["title","글의 제목","하","en"],["blank","빈칸 추론","상",""],["grammar_wrong","어법 · 틀린 것","하",""],["vocab_wrong","어휘 · 부적절","하",""],["mismatch","내용 불일치","하","en"],["summary","요약문 완성","상",""],["implication","함축 의미","상",""],["irrelevant","무관한 문장","하",""]];
+const PS_ORDER=PS_TYPES.map(x=>x[0]);
+state.ps=(()=>{ const d=LS.get("bj-ps-draft",null), ty=LS.get("bj-ps-types",null); return {kicker:(d&&d.kicker)||"", rows:(d&&d.rows)||[emptyRow()], savedAt:(d&&d.savedAt)||null, types:Array.isArray(ty)?ty.filter(x=>PS_ORDER.includes(x)):PS_ORDER.slice()}; })();
+function psItems(){ return PS_TYPES.filter(x=>state.ps.types.includes(x[0])).map(([id,,lv,lang])=>itemOf(id,lv,lang||undefined)); }
+function psTally(){
+  const el=$("#ps-tally"); const rows=filledRows("ps"), nt=psItems().length;
+  if(el) el.innerHTML=`<b>${rows.length*nt}</b>문항 <small>(지문 ${rows.length} × 유형 ${nt})</small><br><small>${rows.length?"지문마다 유형이 중요도 순으로 이어집니다":"지문을 넣어 주세요"}</small>`;
+  const b=$("#ps-run"); if(b) b.disabled=!rows.length||!nt||state.running||(sampleChecked&&!sample);
+}
+function viewPs(){
+  const head=`<div class="phead"><div><h1>지문별 시험지</h1><p>지문이 먼저 나오고, 그 지문에서 나올 만한 문제가 중요한 유형부터 이어집니다. 순서·삽입 문제는 넣지 않았습니다. 유형은 자동으로 정합니다.</p></div><span class="spacer"></span>${subTabs("ps",[["new","새로 만들기"],["result","결과"]])}</div>`;
+  if(state.sub.ps==="result"){
+    const s=state.set||{};
+    return head+`<div class="rbar"><div class="subtabs">${[["q","문제지"],["a","해설지"],["log","교정 기록"]].map(([k,l])=>`<button type="button" data-rtab="${k}" aria-selected="${state.tab===k}">${l}</button>`).join("")}</div><span class="spacer"></span>
+      <button class="btn" type="button" id="ps-print-q">문제지 인쇄</button><button class="btn" type="button" id="ps-print-a">해설지 인쇄</button>${downloads?`<button class="btn" type="button" id="ps-save-q">문제지 저장</button><button class="btn" type="button" id="ps-save-a">해설지 저장</button>`:""}</div>
+      <div class="rinfo"><strong>${esc(s.title||"지문별 시험지")}</strong>${state.running?" · 만드는 중":""} <button class="link danger" type="button" id="stop"${state.running?"":" hidden"}>중지</button><button class="link" type="button" id="retry" hidden>오류 난 지문 다시 만들기</button></div>
+      <ul class="prog" id="prog"></ul><div class="sheets" id="sheets"></div>`;
+  }
+  const b=state.ps;
+  return head+`<div class="gen-right" style="max-width:1100px">
+    <section class="card"><h3>기본 정보</h3>
+      <label class="field" style="margin-top:14px"><span>머리말 <small>불러온 시험 이름으로 자동 입력 · 직접 고쳐도 됩니다</small></span><input data-p2="kicker" value="${esc(b.kicker)}" placeholder="예: 2026년 10월 서울시 교육청 고3"></label>
+      <div class="savedat" data-saved="ps">${b.savedAt?`마지막 임시 저장: ${fmtTime(b.savedAt)}`:"입력한 내용은 자동으로 임시 저장됩니다."}</div></section>
+    <section class="card"><h3>문제 유형 <small>중요도 순 · 체크를 풀면 빠집니다</small></h3>
+      <p class="hint">지문 하나에 아래 유형이 위에서부터 차례로 나옵니다. 지문 한 쪽에 5개 이상의 문제가 들어가도록 쪽을 채웁니다.</p>
+      <div class="pstypes">${PS_TYPES.map(([id,nm,lv],i)=>`<label class="chk"><input type="checkbox" data-pstype="${id}"${b.types.includes(id)?" checked":""}> <b>${i+1}</b> ${esc(nm)} <small>${lv}</small></label>`).join("")}</div></section>
+    <section class="card"><h3>영어 지문 <small data-count="ps">${tableCount("ps")}</small></h3>
+      ${dropZone("ps")}
+      ${renderTable("ps")}
+      <div class="tablebar"><button class="btn" type="button" data-addrow="ps">+ 지문 추가</button><button class="btn" type="button" data-import="ps">모의고사 지문 불러오기</button><button class="btn" type="button" id="ps-copy">변형문제 지문 가져오기</button></div></section>
+    <div class="runbar"><div class="tally" id="ps-tally"></div><span class="spacer"></span><button class="btn primary big" type="button" id="ps-run">지문별 시험지 만들기</button></div>
+  </div>`;
+}
+function psRun(){
+  if(!sample){toast("이 페이지를 Claude 안에서 열어야 문제를 만들 수 있습니다.");return}
+  const rows=filledRows("ps"), items=psItems(); if(!rows.length||!items.length){toast("지문과 유형을 확인해 주세요.");return}
+  state.level="high"; posCount=[0,0,0,0,0]; state.tab="q";
+  const stamp=Date.now().toString(36);
+  const units=[]; rows.forEach((r,i)=>{
+    const P={key:"ps"+i+"_"+stamp,grade:/[고중][123]/.exec(r.src||"")?.[0]||"",no:(r.title||"").replace(/번$/,"")||String(i+1),exam:r.src||state.ps.kicker||"지문",text:tidyBreaks(r.text),kind:"",lvl:"high"};
+    P.parts=[P.text]; chunk(items,3).forEach((g,gi)=>units.push({id:P.key+"-"+gi,p:{...P},types:g,status:"wait",questions:[]}));
+  });
+  state.units=units;
+  state.set={title:(state.ps.kicker||"").trim()||"지문별 시험지",demo:false,questions:[],created:Date.now(),total:units.reduce((a,u)=>a+u.types.length,0),level:"high",mode:"ps"};
+  state.sub.ps="result"; renderView();
+  runUnits(units);
+}
+function psGroups(){
+  const qs=((state.set&&state.set.questions)||[]).filter(q=>q.ok&&T[q.type]);
+  const order=[], map=new Map();
+  qs.forEach(q=>{ const k=q.src.exam+"|"+q.src.no; if(!map.has(k)){map.set(k,{key:k,no:q.src.no,exam:q.src.exam,orig:q.orig,qs:[]}); order.push(k);} map.get(k).qs.push(q); });
+  return order.map(k=>{ const g=map.get(k); g.qs.sort((a,b)=>PS_ORDER.indexOf(a.type)-PS_ORDER.indexOf(b.type)); return g; });
+}
+function buildPsPages(kind){
+  const gs=psGroups(); if(!gs.length) return [];
+  const blocks=[], numTxt=g=>`${g.no}${/^\d/.test(g.no)?"번":""}`;
+  gs.forEach(g=>{
+    const list=g.qs.map((q,i)=>({q,n:i+1}));
+    if(kind==="q"){
+      blocks.push({br:true,cat:numTxt(g),html:`<div class="ps-pass"><div class="ps-h"><b>${esc(numTxt(g))}</b><span>${esc(g.exam||"")}</span></div><div class="ps-i">다음 글을 읽고 물음에 답하시오.</div><div class="q-passage">${inline(g.orig||"")}</div></div>`});
+      list.forEach(x=>blocks.push({cat:numTxt(g),html:qHTML(x.q,x.n,{noPass:true})}));
+    } else {
+      blocks.push({br:true,cat:numTxt(g),html:`<div class="ps-h"><b>${esc(numTxt(g))}</b><span>${esc(g.exam||"")} · 정답 및 해설</span></div>`});
+      keyHTML(list).forEach(b=>blocks.push({cat:numTxt(g),html:b.html}));
+      list.forEach(x=>blocks.push({cat:numTxt(g),html:aHTML(x.q,x.n)}));
+    }
+  });
+  return paginate(blocks,kind,true);
 }
 
 /* ================= analysis (지문 분석서) ================= */
@@ -4029,7 +4110,7 @@ function pdfModalHTML(m){
 }
 /* drag events */
 let dragDepth=0;
-function dropKey(){ if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
+function dropKey(){ if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
 document.addEventListener("dragenter",e=>{ if(!dropKey()||!e.dataTransfer||![...e.dataTransfer.types].includes("Files")) return; dragDepth++; document.body.classList.add("dragging"); });
 document.addEventListener("dragleave",e=>{ if(!dropKey()) return; dragDepth=Math.max(0,dragDepth-1); if(!dragDepth) document.body.classList.remove("dragging"); });
 document.addEventListener("dragover",e=>{ if(dropKey()&&e.dataTransfer&&[...e.dataTransfer.types].includes("Files")){ e.preventDefault(); e.dataTransfer.dropEffect="copy"; } });
@@ -8414,6 +8495,7 @@ const ICONS={
   cr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 3 5 13.500h6L10 21l8-10.500h-6z"/></svg>',
   hs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.500 5.500-1.500 8-.5V18c-2.500-1-5.500-1-8 .5-2.500-1.500-5.500-1.500-8-.5z"/><path d="M12 6v12.500"/></svg>',
   exam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>',
+  ps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
   basic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4 3 8l9 4 9-4-9-4z"/><path d="M6 10v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>',
   ana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>',
   mat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h7l2 2h9v11H3z"/></svg>',
@@ -8423,11 +8505,11 @@ const ICONS={
   att:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M9 3v4M15 3v4M8 14.5l2 2 4-4"/></svg>',
   set:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>'
 };
-const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
+const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
 function renderNav(){
   const item=(v)=>`<button type="button" data-view="${v}"${state.view===v?' aria-current="page"':""}>${ICONS[v]}<span>${VIEWS[v][1]}</span>${v==="mat"&&state.materials.length?`<span class="badge">${state.materials.length}</span>`:v==="lib"?`<span class="badge">${allExams().length}</span>`:""}</button>`;
   const itemLv=lv=>`<button type="button" data-view="gen" data-level="${lv}"${state.view==="gen"&&state.level===lv?' aria-current="page"':""}>${ICONS.gen}<span>${lv==="mid"?"중등 변형문제":"고등 변형문제"}</span></button>`;
-  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("exam")}${item("cr")}${item("cls")}${item("wkbk")}${item("basic")}${item("tb")}${item("hs")}${item("ana")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
+  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("exam")}${item("cr")}${item("cls")}${item("wkbk")}${item("basic")}${item("tb")}${item("hs")}${item("ana")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
   const [g,n0]=VIEWS[state.view]; const n=state.view==="gen"?levelName()+" 변형문제":n0; $("#crumb").innerHTML=`${g}<i>/</i><b>${n}</b>`;
   $("#who").innerHTML=`<span>관리자</span><b>${esc(state.academy||"학원")}</b><span class="av">${esc((state.academy||"B").trim().charAt(0))}</span>`;
 }
@@ -8548,6 +8630,12 @@ async function renderSheets(){
   const el=$("#sheets"); if(!el) return; const tok=++renderToken;
   try{await document.fonts.ready}catch(e){} if(tok!==renderToken) return;
   if(state.tab==="log"){el.innerHTML=renderLog();return}
+  if(state.view==="ps"){
+    const gs=psGroups(); if(!gs.length){el.innerHTML=`<div class="empty"><h3>${state.running?"교정이 끝난 문항부터 조판됩니다":"아직 조판할 문항이 없습니다"}</h3><p>${state.running?"잠시만 기다려 주세요.":"새로 만들기에서 지문을 넣어 주세요."}</p></div>`;return}
+    const pages=buildPsPages(state.tab==="a"?"a":"q");
+    el.innerHTML=pages.map((p,i)=>`<div class="frame"><span class="pageno">${i+1} / ${pages.length}</span>${p}</div>`).join(""); fitScale("#sheets");
+    const c=$("#cnt-result"); if(c) c.textContent=gs.reduce((a,g)=>a+g.qs.length,0); return;
+  }
   const qs=orderedQs();
   if(!qs.length){el.innerHTML=`<div class="empty"><h3>${state.running?"교정이 끝난 문항부터 조판됩니다":"아직 조판할 문항이 없습니다"}</h3><p>${state.running?"잠시만 기다려 주세요.":"새로 만들기에서 지문과 세트를 정해 주세요."}</p></div>`;return}
   const pages=buildPages(state.tab);
@@ -8621,6 +8709,7 @@ function renderView(){
   else if(v==="cr") html=viewCr();
   else if(v==="tb") html=viewTb();
   else if(v==="basic") html=viewBasic();
+  else if(v==="ps") html=viewPs();
   else if(v==="mat") html=viewMat();
   else if(v==="lib") html=`<div class="phead"><div><h1>원본 보관함</h1><p>모의고사 원본 지문을 연도별로 보관합니다. 변형문제·분석서의 '모의고사 지문 불러오기'에서 바로 씁니다.</p></div></div>`+renderLib();
   else if(v==="notes") html=`<div class="phead"><div><h1>교정 노트</h1></div></div><div style="max-width:980px">${renderLessons()}</div>`;
@@ -8632,6 +8721,7 @@ function renderView(){
   if(v==="ana"&&state.sub.ana==="new") renderAnaTally();
   if(v==="cls"){ if(state.sub.cls==="result"){renderClsProgress();renderClsSheets();} else renderClsTally(); }
   if(v==="wkbk"){ if(state.sub.wkbk==="result"){renderWkbkProgress();renderWkbkSheets();} else if(state.sub.wkbk==="words") renderWkbkWordSheets(); else renderWkbkTally(); }
+  if(v==="ps"){ if(state.sub.ps==="result"){renderProg();renderRunState();renderSheets();} else psTally(); }
   if(v==="basic"){ if(state.sub.basic==="result"){renderBasicProgress();renderBasicSheets();} else renderBasicTally(); }
   if(v==="exam"){ if(state.sub.exam==="result"){renderExamProgress();renderExamSheets();} else renderExamTally(); }
   if(v==="tb"){ if(state.sub.tb==="result"){renderTbProgress();renderTbSheets();} else renderTbTally(); }
@@ -8765,6 +8855,10 @@ document.addEventListener("click",async e=>{
   if(t.closest("#exam-print")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"q"),`${exTitle()} 문제지`);return}
   if(t.closest("#exam-printkey")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"a"),`${exTitle()} 정답 및 해설`);return}
   if(t.closest("#exam-save")){try{await document.fonts.ready}catch(_){} saveDoc(`${exTitle()} ${state.exam.tab==="a"?"정답 및 해설":"문제지"}`,exPages(state.examResult,state.exam.tab));return}
+  if(t.closest("#ps-run")){psRun();return}
+  if(t.closest("#ps-copy")){addRows("ps",filledRows("gen").map(r=>({...r})));return}
+  if(t.closest("#ps-print-q")||t.closest("#ps-print-a")){const k=t.closest("#ps-print-a")?"a":"q"; try{await document.fonts.ready}catch(_){} printPages(buildPsPages(k),`${state.set.title||"지문별 시험지"} ${k==="a"?"해설지":"문제지"}`);return}
+  if(t.closest("#ps-save-q")||t.closest("#ps-save-a")){const k=t.closest("#ps-save-a")?"a":"q"; try{await document.fonts.ready}catch(_){} saveDoc(`${state.set.title||"지문별 시험지"} ${k==="a"?"해설지":"문제지"}`,buildPsPages(k));return}
   if(t.closest("#basic-run")){runBasic();return}
   if(t.closest("#basic-stop")){state.basic.run.ctl&&state.basic.run.ctl.abort();return}
   if(t.closest("#basic-copy")){addRows("basic",filledRows("gen").map(r=>({...r})));return}
@@ -8833,6 +8927,8 @@ document.addEventListener("input",e=>{
   if(t.dataset.e2){state.exam[t.dataset.e2]=t.value;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500); const hp=$("#exam-headprev"); if(hp) hp.textContent=exHeadTitle(state.exam)||"(학교·시험 이름을 넣어 주세요)"; return}
   if(t.dataset.e2n){const v=Math.max(0,Math.min(20,parseInt(t.value,10)||0)); state.exam[t.dataset.e2n]=t.dataset.e2n==="maxPer"?Math.max(1,v):v; clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();return}
   if(t.dataset.exsc){const v=Math.max(1,Math.min(10,parseInt(t.value,10)||0)); if(v){state.exam.scores[t.dataset.exsc]=v;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();} return}
+  if(t.dataset.p2){state.ps[t.dataset.p2]=t.value;clearTimeout(draftT.ps);draftT.ps=setTimeout(()=>saveDraft("ps"),500);return}
+  if(t.dataset.pstype){const set=new Set(state.ps.types); if(t.checked) set.add(t.dataset.pstype); else set.delete(t.dataset.pstype); state.ps.types=PS_ORDER.filter(x=>set.has(x)); LS.set("bj-ps-types",state.ps.types); psTally(); return}
   if(t.dataset.b2){state.basic[t.dataset.b2]=t.value;clearTimeout(draftT.basic);draftT.basic=setTimeout(()=>saveDraft("basic"),500);return}
   if(t.id==="mat-q"){state.matQ=t.value;clearTimeout(draftT.matq);draftT.matq=setTimeout(()=>{const el=$("#mat-q");const pos=el&&el.selectionStart;renderView();const e2=$("#mat-q");if(e2){e2.focus();try{e2.setSelectionRange(pos,pos)}catch(_){}}} ,250);return}
   if(t.id==="s-academy"){state.academy=t.value;persist();renderNav();return}
