@@ -519,6 +519,18 @@ body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var
 .q-src .lvl{display:inline-block;margin-left:1.6mm;padding:0 1.3mm;border:.25mm solid #1E4BD2;border-radius:.8mm;color:#1E4BD2;font-size:6.6pt;line-height:1.5}
 /* ps */
 .page.ps .q-src,.page.mt .q-src{display:none}
+.rf-h{display:flex;align-items:baseline;gap:2.4mm;margin-bottom:1.6mm}.rf-h b{font-size:15pt;color:#1E4BD2}.rf-h span{font-size:8.8pt;color:#555}
+.rf-i{font-size:9pt;line-height:1.5;background:#f5f7ff;border:.3mm solid #c9d4f6;border-radius:1.2mm;padding:2mm 2.6mm;margin-bottom:1.6mm}
+.rf-pass{font-size:8.2pt;line-height:1.5;border:.3mm solid #ccc;border-radius:1.2mm;padding:2mm 2.6mm;color:#222}
+.rf-o{display:flex;gap:2mm;align-items:flex-start;padding:1.5mm 0;border-bottom:.2mm dotted #bbb;font-size:9.6pt;line-height:1.5}
+.rf-n{flex:none;width:6mm;font-weight:700;color:#1E4BD2}.rf-t{flex:1}.rf-t small{color:#1E4BD2;font-weight:700;margin-right:1mm}.rf-t .why{display:block;font-size:8.2pt;color:#a33;margin-top:.6mm;font-weight:400}
+.rf-b{flex:none;font-size:8.4pt;color:#555;white-space:nowrap}
+.rf-seq,.rf-ans{margin-top:2.5mm}.rf-sl{font-weight:700;font-size:9.4pt;margin-bottom:1.6mm}
+.rf-boxes{display:flex;flex-wrap:wrap;align-items:center;gap:1.2mm}.rf-boxes em{font-style:normal;color:#888;font-size:9pt}
+.rf-box{display:inline-flex;width:9mm;height:9mm;border:.35mm solid #333;border-radius:1mm;align-items:flex-start;justify-content:flex-start;font-size:10pt;font-weight:700}
+.rf-box i{font-style:normal;font-size:6pt;color:#999;padding:.4mm .6mm}.rf-box.a{align-items:center;justify-content:center;color:#1E4BD2;border-color:#1E4BD2}
+.rf-o.ok .rf-n{color:#111}
+
 .page.ps .q .q-passage{font-size:8.4pt;line-height:1.5}
 .page.ps .ps-pass .q-passage{font-size:9pt;line-height:1.55;text-align:left}
 .ps-pass{border:.3mm solid #1E4BD2;border-radius:1.2mm;padding:2.6mm 3.2mm;background:#f5f7ff}
@@ -1627,7 +1639,7 @@ const LS = {
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){return} try{syncTouch(k)}catch(e){}}
 };
 /* ---------------- 기기 간 동기화: 초안·진행 중 작업·설정을 서버(db)에도 저장해 다른 컴퓨터에서 이어서 쓴다 ---------------- */
-const SYNC_KEYS=new Set(["bj-mt-draft","bj-mt-opts","bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
+const SYNC_KEYS=new Set(["bj-rf-draft","bj-mt-draft","bj-mt-opts","bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
   "bj-wkbk-last","bj-cls-last","bj-ana-last","bj-basic-last","bj-exam-draft","bj-exam-last","bj-hs-draft","bj-hs-last","bj-cr-draft","bj-cr-last","bj-tb-draft","bj-tb-last","bj-ext","bj-ext-mid","jp-set","bj-bookgrammar","bj-cls-wb","bj-wkbk-acts","bj-settings","bj-att","bj-lg"]);
 const SYNC_TS_KEY="bj-sync-ts"; const _syncT={};
 function syncTs(){ try{return JSON.parse(localStorage.getItem(SYNC_TS_KEY)||"{}")||{}}catch(e){return {}} }
@@ -1688,7 +1700,7 @@ const anaDraft = LS.get("bj-ana-draft",null);
 const state = {
   view: saved.view || "gen",
   level: saved.level==="mid"?"mid":"high",
-  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new", mt:"new"},
+  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new", mt:"new", rf:"new"},
   genSel: new Set(),
   counts: saved.counts || {...DEFAULT_COUNTS,...MID_DEFAULT},
   folded: saved.folded || {},
@@ -1779,7 +1791,7 @@ function renderTable(key){
 }
 function tableCount(key){const n=filledRows(key).length;return `${n}/${rowsOf(key).length}개 입력 · 최대 30개`}
 /* 머리말 자동 입력: 불러온 지문의 시험 이름으로 채우되, 직접 고친 값은 건드리지 않습니다 */
-const KICK_SEL={mt:"data-m2",ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
+const KICK_SEL={rf:"data-r2",mt:"data-m2",ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
 function autoKick(key){
   const st=state[key]; if(!st||!st.rows||!KICK_SEL[key]) return;
   const el=document.querySelector(`[${KICK_SEL[key]}="kicker"]`); if(el&&document.activeElement===el) return;
@@ -1795,10 +1807,10 @@ function saveDraft(key){
   if(key==="hs"){ hsSaveDraft(); return; }
   if(key==="cr"){ crSaveDraft(); return; }
   state[key].savedAt=Date.now();
-  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft",mt:"bj-mt-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
+  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft",mt:"bj-mt-draft",rf:"bj-rf-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
   const el=document.querySelector(`[data-saved="${key}"]`); if(el) el.textContent=`마지막 임시 저장: ${fmtTime(state[key].savedAt)}`;
   const c=document.querySelector(`[data-count="${key}"]`); if(c) c.textContent=tableCount(key);
-  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally(); else if(key==="mt") mtTally();
+  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally(); else if(key==="mt") mtTally(); else if(key==="rf") rfTally();
 }
 function addRows(key,items){
   const rows=rowsOf(key);
@@ -2884,12 +2896,12 @@ function orderedQs(){
     : (pn(a)-pn(b))||(ci(a)-ci(b))||(ti(a.type)-ti(b.type))||(lv(a)-lv(b)));
 }
 let pxPerMm=3.7795;
-function measureSetup(ps){
-  const m=$("#measure"); m.innerHTML=`<div class="page${ps?" ps":""}" style="position:static"><div class="col" id="mcol" style="width:87mm"></div><div id="mref" style="height:100mm"></div></div>`;
+function measureSetup(cls){
+  const m=$("#measure"); m.innerHTML=`<div class="page${cls?" "+cls:""}" style="position:static"><div class="col" id="mcol" style="width:87mm"></div><div id="mref" style="height:100mm"></div></div>`;
   pxPerMm = $("#mref").getBoundingClientRect().height/100 || 3.7795;
 }
 function paginate(blocks,kind,popt){
-  measureSetup(!!popt&&popt.cls==="ps");
+  measureSetup(popt?popt.cls:"");
   const col=$("#mcol"); const colH=252*pxPerMm;
   const heights=blocks.map(b=>{col.innerHTML=b.html;let h=col.scrollHeight; if(h>colH){col.innerHTML=`<div class="squeeze">${b.html}</div>`;h=col.scrollHeight;b.squeeze=true} return h});
   col.innerHTML="";
@@ -3334,6 +3346,119 @@ async function createDraftMaterial(total){
 }
 
 
+
+
+/* ================= 리딩 플로우 (하위권 · 한글+영어 낱말 선지 20개 → 옳은 선지를 글 흐름 순서로 배열) ================= */
+const RF_CIRC=["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"];
+state.rf=(()=>{ const d=LS.get("bj-rf-draft",null); return {kicker:(d&&d.kicker)||"", rows:(d&&d.rows)||[emptyRow()], savedAt:(d&&d.savedAt)||null, showPass:true, run:{running:false,done:0,total:0,ctl:null}}; })();
+state.rfResult=null; state.rfTab="q";
+function rfPrompt(p){
+  return `당신은 영어 지문의 내용을 이해하는 데 어려움을 겪는 학생(하위권)을 가르치는 강사입니다. 지문 전체의 흐름을 한글로 풀어 설명한 '리딩 플로우' 선지를 만듭니다. 학생은 선지 20개 가운데 옳은 것을 고르고, 그 선지들을 글의 흐름 순서대로 배열하면서 지문 전체 내용을 파악합니다.
+${passageHeader(p)}
+[만들 것] options 정확히 20개 = 옳은 선지(ok:true) 12개 + 틀린 선지(ok:false) 8개. 지문이 짧아 12개가 어려우면 옳은 선지 10~11개, 틀린 선지 9~10개로 하되 합계는 반드시 20개입니다.
+1. 옳은 선지: 지문의 처음부터 끝까지 흐름 순서대로 pos 1,2,3…을 붙입니다. 선지 하나는 지문의 내용 한 가지(상황·원인·예시·결과·글쓴이의 생각 등)를 쉬운 한글 한 문장(25~60자)으로 풀어 쓴 것입니다. 옳은 선지를 pos 순서로 이어 읽으면 지문 전체를 설명하는 한 편의 글이 되어야 합니다. 같은 내용을 두 번 쓰지 않습니다.
+2. 영어 낱말: 한글로 설명하다가 중요한 낱말은 한글 바로 뒤 괄호 안에 영어를 지문에 나온 그대로 적습니다. 선지마다 1~2개. 예) 학교 축제(festival)가 10월 14일에 열린다. 괄호 속 영어는 반드시 지문에 있는 낱말(필요하면 원형)이어야 합니다. 영어 문장을 통째로 쓰지 않습니다.
+3. 틀린 선지: 옳은 선지와 같은 문체·길이로, 지문 내용을 반대로 바꾸거나, 원인과 결과를 뒤바꾸거나, 지문에 없는 내용을 더하거나, 일부를 과장해서 만듭니다. 단, 지문을 읽은 학생이 틀렸다는 것을 확실히 가려낼 수 있어야 하며 애매한 선지는 금지입니다. 틀린 선지에도 영어 낱말 괄호를 넣습니다. why에 지문 근거로 왜 틀렸는지 한 줄(한글)로 씁니다.
+[규칙] 지문에 없는 사실·수치·의견을 옳은 선지에 쓰지 않습니다. 중학교 2학년이 이해하는 쉬운 우리말로 씁니다. 옳은 선지와 틀린 선지는 섞인 순서로 출력해도 되며 pos로 순서를 표시합니다.
+[출력] 설명 없이 JSON 하나만: {"title_ko":"지문을 한 줄로 요약한 한글 제목","options":[{"t":"한글 선지(영어 낱말)","ok":true,"pos":1,"why":""},{"t":"…","ok":false,"why":"지문은 …라고 말한다"}]}`;
+}
+function rfNorm(r,text){
+  if(!r||typeof r!=="object"||!Array.isArray(r.options)) return null;
+  const ko=t=>/[가-힣]/.test(t), flat=t=>String(t||"").toLowerCase(), src=flat(text);
+  const fixParen=t=>t.replace(/\(([A-Za-z][A-Za-z' \-]{1,30})\)/g,(m,w)=>{ const k=w.toLowerCase().trim(); const stem=k.length>5?k.slice(0,k.length-2):k; return src.includes(stem)?m:""; }).replace(/\s{2,}/g," ").trim();
+  const seen=new Set(), ok=[], bad=[];
+  r.options.forEach(o=>{ if(!o) return; let t=String(o.t||"").replace(/\s+/g," ").trim(); if(t.length<10||!ko(t)) return; t=fixParen(t).slice(0,110);
+    const k=t.replace(/[^가-힣A-Za-z0-9]/g,""); if(seen.has(k)) return; seen.add(k);
+    if(o.ok===true) ok.push({t,pos:Number(o.pos)||999,why:""}); else bad.push({t,why:String(o.why||"").replace(/\s+/g," ").trim().slice(0,90)}); });
+  ok.sort((a,b)=>a.pos-b.pos);
+  if(ok.length<9||ok.length>13) return null;
+  const need=20-ok.length; if(bad.length<need) return null;
+  const items=[...ok.map((o,i)=>({t:o.t,ok:true,pos:i+1,why:""})),...bad.slice(0,need).map(o=>({t:o.t,ok:false,pos:0,why:o.why}))];
+  for(let i=items.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+  items.forEach((o,i)=>o.n=RF_CIRC[i]);
+  const order=items.filter(o=>o.ok).sort((a,b)=>a.pos-b.pos).map(o=>o.n);
+  return {title_ko:String(r.title_ko||"").replace(/\s+/g," ").trim().slice(0,60),opts:items,order};
+}
+function rfTally(){
+  const el=$("#rf-tally"); const rows=filledRows("rf");
+  if(el) el.innerHTML=`지문 <b>${rows.length}</b>개${rows.length?` · 지문마다 선지 20개 · 예상 약 ${Math.max(1,Math.ceil(rows.length/4))}분`:""}`;
+  const b=$("#rf-run"); if(b) b.disabled=!rows.length||state.rf.run.running||(sampleChecked&&!sample);
+}
+function rfProg(){
+  const el=$("#rf-prog"); if(!el||!state.rfResult) return; const r=state.rf.run, docs=state.rfResult.docs;
+  const bad=docs.filter(d=>d.status==="error").length;
+  el.innerHTML=r.running?`만들고 있습니다. ${docs.filter(d=>d.status==="done"||d.status==="error").length}/${docs.length}개 지문 <button class="link danger" type="button" id="rf-stop">중지</button>`:(bad?`${bad}개 지문은 만들지 못했습니다. <button class="link" type="button" id="rf-retry">다시 만들기</button>`:"");
+}
+function viewRf(){
+  const head=`<div class="phead"><div><h1>리딩 플로우</h1><p>내용 이해가 어려운 학생을 위한 자료입니다. 한글 설명 속에 핵심 영어 낱말(영어)을 넣은 선지 20개 중 옳은 것을 고르고, 글의 흐름 순서대로 배열해 지문 전체를 파악합니다.</p></div><span class="spacer"></span>${subTabs("rf",[["new","새로 만들기"],["result","결과"]])}</div>`;
+  if(state.sub.rf==="result") return head+`<div class="rbar"><div class="subtabs">${[["q","문제지"],["a","해설지"]].map(([k,l])=>`<button type="button" data-rftab="${k}" aria-selected="${state.rfTab===k}">${l}</button>`).join("")}</div>
+    <label class="chk" style="margin-left:10px"><input type="checkbox" id="rf-pass"${state.rf.showPass?" checked":""}> 문제지에 영어 지문 함께 인쇄</label><span class="spacer"></span>
+    <button class="btn" type="button" id="rf-print-q">문제지 인쇄</button><button class="btn" type="button" id="rf-print-a">해설지 인쇄</button>${downloads?`<button class="btn" type="button" id="rf-save-q">문제지 저장</button><button class="btn" type="button" id="rf-save-a">해설지 저장</button>`:""}</div>
+    <div class="rinfo" id="rf-prog"></div><div class="sheets" id="rf-sheets"></div>`;
+  const b=state.rf;
+  return head+`<div class="gen-right" style="max-width:1100px">
+    <section class="card"><h3>기본 정보</h3>
+      <label class="field" style="margin-top:14px"><span>머리말 <small>불러온 시험 이름으로 자동 입력 · 직접 고쳐도 됩니다</small></span><input data-r2="kicker" value="${esc(b.kicker)}" placeholder="예: 2026년 9월 고2 모의고사"></label>
+      <p class="hint" style="margin-top:12px">지문마다 한 쪽(길면 두 쪽)이 만들어집니다. 선지는 20개이고, 그중 옳은 선지(보통 12개)를 글의 흐름 순서로 배열하는 방식입니다. 선지는 한글 설명이며 핵심 낱말 옆에 영어가 붙습니다.</p>
+      <div class="savedat" data-saved="rf">${b.savedAt?`마지막 임시 저장: ${fmtTime(b.savedAt)}`:"입력한 내용은 자동으로 임시 저장됩니다."}</div></section>
+    <section class="card"><h3>영어 지문 <small data-count="rf">${tableCount("rf")}</small></h3>
+      ${dropZone("rf")}
+      ${renderTable("rf")}
+      <div class="tablebar"><button class="btn" type="button" data-addrow="rf">+ 지문 추가</button><button class="btn" type="button" data-import="rf">모의고사 지문 불러오기</button><button class="btn" type="button" id="rf-copy">변형문제 지문 가져오기</button></div></section>
+    <div class="runbar"><div class="tally" id="rf-tally"></div><span class="spacer"></span><button class="btn primary big" type="button" id="rf-run">리딩 플로우 만들기</button></div>
+  </div>`;
+}
+async function rfGen(d,run){
+  const p={exam:d.src||"지문",no:d.no,grade:/고[123]/.exec(d.src||"")?.[0]||"",text:d.text};
+  d.status="work";
+  for(let a=0;a<3&&!run.ctl.signal.aborted;a++){
+    let r=null; try{ r=await sample.json(rfPrompt(p),{modelTier:state.tier,signal:run.ctl.signal,cache:false}); }catch(e){ if(e&&e.code==="cancelled") throw e; if(e&&["not_granted","rate_limited","sampling_disabled","session_expired"].includes(e.code)){ d.error=errCopy(e); d.status="error"; run.ctl.abort(); toast(errCopy(e)); return; } r=null; }
+    const n=rfNorm(r,d.text); if(n){ Object.assign(d,n,{status:"done"}); return; }
+  }
+  d.status=run.ctl.signal.aborted?"stop":"error";
+}
+async function rfRun(onlyBad){
+  if(!sample){toast("이 페이지를 Claude 안에서 열어야 자료를 만들 수 있습니다.");return}
+  const run=state.rf.run;
+  if(!onlyBad){
+    const rows=filledRows("rf"); if(!rows.length){toast("지문을 넣어 주세요.");return}
+    state.rfResult={kicker:state.rf.kicker,created:Date.now(),docs:rows.map((r,i)=>({n:i+1,no:(r.title||"").replace(/번$/,"").trim()||String(i+1),src:r.src||"",text:tidyBreaks(r.text),status:"wait",opts:[],order:[],title_ko:""}))};
+    state.sub.rf="result"; state.rfTab="q"; renderView();
+  }
+  run.running=true; run.ctl=new AbortController(); rfProg();
+  const queue=state.rfResult.docs.filter(d=>d.status!=="done"); let busy=0;
+  const worker=async()=>{ while(queue.length&&!run.ctl.signal.aborted){ const d=queue.shift(); try{ await rfGen(d,run); }catch(e){ d.status="stop"; } rfProg(); renderRfSheets(); } };
+  await Promise.all(Array.from({length:4},worker));
+  run.running=false; state.rfResult.docs.forEach(d=>{ if(d.status==="wait"||d.status==="work") d.status="stop"; }); rfProg(); renderRfSheets();
+  const ok=state.rfResult.docs.filter(d=>d.status==="done").length; if(ok) toast(`리딩 플로우 ${ok}개를 만들었습니다.`);
+}
+function buildRfPages(kind){
+  const res=state.rfResult; if(!res) return [];
+  const docs=res.docs.filter(d=>d.status==="done"); if(!docs.length) return [];
+  const blocks=[];
+  docs.forEach(d=>{
+    const nm=`${d.no}${/^\d/.test(d.no)?"번":""}`;
+    if(kind==="q"){
+      blocks.push({br:true,cat:nm,html:`<div class="rf-h"><b>${esc(nm)}</b><span>${esc(d.src||res.kicker||"")}</span></div><div class="rf-i"><b>다음 선지 20개 중 옳은 것을 모두 고르세요.</b> 옳은 선지의 번호는 <b>글의 흐름 순서대로</b> 아래 칸에 쓰세요. 선지 속 영어 낱말(영어)을 힌트로 지문 내용을 떠올려 보세요.</div>`});
+      if(state.rf.showPass) blocks.push({cat:nm,html:`<div class="rf-pass">${inline(d.text)}</div>`});
+      d.opts.forEach(o=>blocks.push({cat:nm,html:`<div class="rf-o"><span class="rf-n">${o.n}</span><span class="rf-t">${esc(o.t)}</span><span class="rf-b">옳음 ( )</span></div>`}));
+      blocks.push({cat:nm,html:`<div class="rf-seq"><div class="rf-sl">옳은 선지 ${d.order.length}개를 글의 흐름 순서대로 쓰세요.</div><div class="rf-boxes">${d.order.map((_,i)=>`<span class="rf-box"><i>${i+1}</i></span>${i<d.order.length-1?"<em>→</em>":""}`).join("")}</div></div>`});
+    } else {
+      blocks.push({br:true,cat:nm,html:`<div class="rf-h"><b>${esc(nm)}</b><span>${esc(d.title_ko||"")} · 정답 및 해설</span></div><div class="rf-ans"><div class="rf-sl">정답 배열</div><div class="rf-boxes">${d.order.map((n,i)=>`<span class="rf-box a">${n}</span>${i<d.order.length-1?"<em>→</em>":""}`).join("")}</div></div>`});
+      blocks.push({cat:nm,html:`<div class="rf-sl" style="margin-top:2mm">완성된 글의 흐름</div>`});
+      d.order.forEach((n,i)=>{ const o=d.opts.find(x=>x.n===n); blocks.push({cat:nm,html:`<div class="rf-o ok"><span class="rf-n">${i+1}</span><span class="rf-t"><small>${o.n}</small> ${esc(o.t)}</span></div>`}); });
+      blocks.push({cat:nm,html:`<div class="rf-sl" style="margin-top:2mm">틀린 선지와 이유</div>`});
+      d.opts.filter(o=>!o.ok).forEach(o=>blocks.push({cat:nm,html:`<div class="rf-o bad"><span class="rf-n">${o.n}</span><span class="rf-t">${esc(o.t)}<small class="why">${esc(o.why||"지문과 맞지 않는 내용")}</small></span></div>`}));
+    }
+  });
+  return paginate(blocks,kind,{cls:"rf",brand:`리딩 플로우${state.rfResult.kicker?" · "+state.rfResult.kicker:""}`});
+}
+async function renderRfSheets(){
+  const el=$("#rf-sheets"); if(!el) return; try{await document.fonts.ready}catch(e){}
+  const pages=buildRfPages(state.rfTab);
+  if(!pages.length){el.innerHTML=`<div class="empty"><h3>${state.rf.run.running?"만들어진 지문부터 조판됩니다":"아직 조판할 지문이 없습니다"}</h3><p>${state.rf.run.running?"잠시만 기다려 주세요.":"새로 만들기에서 지문을 넣어 주세요."}</p></div>`;return}
+  el.innerHTML=pages.map((p,i)=>`<div class="frame"><span class="pageno">${i+1} / ${pages.length}</span>${p}</div>`).join(""); fitScale("#rf-sheets");
+}
 
 /* ================= 모의고사 회차 (지문당 1문항 · 유형 무작위 · 회차별 난이도) ================= */
 const MT_LANG=new Set(["topic","title","purpose","claim","mismatch"]);
@@ -4213,7 +4338,7 @@ function pdfModalHTML(m){
 }
 /* drag events */
 let dragDepth=0;
-function dropKey(){ if(state.view==="mt"&&state.sub.mt==="new") return "mt"; if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
+function dropKey(){ if(state.view==="rf"&&state.sub.rf==="new") return "rf"; if(state.view==="mt"&&state.sub.mt==="new") return "mt"; if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
 document.addEventListener("dragenter",e=>{ if(!dropKey()||!e.dataTransfer||![...e.dataTransfer.types].includes("Files")) return; dragDepth++; document.body.classList.add("dragging"); });
 document.addEventListener("dragleave",e=>{ if(!dropKey()) return; dragDepth=Math.max(0,dragDepth-1); if(!dragDepth) document.body.classList.remove("dragging"); });
 document.addEventListener("dragover",e=>{ if(dropKey()&&e.dataTransfer&&[...e.dataTransfer.types].includes("Files")){ e.preventDefault(); e.dataTransfer.dropEffect="copy"; } });
@@ -8598,6 +8723,7 @@ const ICONS={
   cr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 3 5 13.500h6L10 21l8-10.500h-6z"/></svg>',
   hs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.500 5.500-1.500 8-.5V18c-2.500-1-5.500-1-8 .5-2.500-1.500-5.500-1.500-8-.5z"/><path d="M12 6v12.500"/></svg>',
   exam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>',
+  rf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="6" height="6" rx="1"/><rect x="15" y="14" width="6" height="6" rx="1"/><path d="M9 7h3a3 3 0 0 1 3 3v4"/></svg>',
   mt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M12 9h6M12 13h6M12 17h4"/></svg>',
   ps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
   basic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4 3 8l9 4 9-4-9-4z"/><path d="M6 10v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>',
@@ -8609,11 +8735,11 @@ const ICONS={
   att:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M9 3v4M15 3v4M8 14.5l2 2 4-4"/></svg>',
   set:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>'
 };
-const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],mt:["학습","모의고사 회차"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
+const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],mt:["학습","모의고사 회차"],rf:["학습","리딩 플로우"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
 function renderNav(){
   const item=(v)=>`<button type="button" data-view="${v}"${state.view===v?' aria-current="page"':""}>${ICONS[v]}<span>${VIEWS[v][1]}</span>${v==="mat"&&state.materials.length?`<span class="badge">${state.materials.length}</span>`:v==="lib"?`<span class="badge">${allExams().length}</span>`:""}</button>`;
   const itemLv=lv=>`<button type="button" data-view="gen" data-level="${lv}"${state.view==="gen"&&state.level===lv?' aria-current="page"':""}>${ICONS.gen}<span>${lv==="mid"?"중등 변형문제":"고등 변형문제"}</span></button>`;
-  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("mt")}${item("exam")}${item("cr")}${item("wkbk")}${item("tb")}${item("hs")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
+  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("mt")}${item("rf")}${item("exam")}${item("cr")}${item("wkbk")}${item("tb")}${item("hs")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
   const [g,n0]=VIEWS[state.view]; const n=state.view==="gen"?levelName()+" 변형문제":n0; $("#crumb").innerHTML=`${g}<i>/</i><b>${n}</b>`;
   $("#who").innerHTML=`<span>관리자</span><b>${esc(state.academy||"학원")}</b><span class="av">${esc((state.academy||"B").trim().charAt(0))}</span>`;
 }
@@ -8822,6 +8948,7 @@ function renderView(){
   else if(v==="basic") html=viewBasic();
   else if(v==="ps") html=viewPs();
   else if(v==="mt") html=viewMt();
+  else if(v==="rf") html=viewRf();
   else if(v==="mat") html=viewMat();
   else if(v==="lib") html=`<div class="phead"><div><h1>원본 보관함</h1><p>모의고사 원본 지문을 연도별로 보관합니다. 변형문제·분석서의 '모의고사 지문 불러오기'에서 바로 씁니다.</p></div></div>`+renderLib();
   else if(v==="notes") html=`<div class="phead"><div><h1>교정 노트</h1></div></div><div style="max-width:980px">${renderLessons()}</div>`;
@@ -8833,6 +8960,7 @@ function renderView(){
   if(v==="ana"&&state.sub.ana==="new") renderAnaTally();
   if(v==="cls"){ if(state.sub.cls==="result"){renderClsProgress();renderClsSheets();} else renderClsTally(); }
   if(v==="wkbk"){ if(state.sub.wkbk==="result"){renderWkbkProgress();renderWkbkSheets();} else if(state.sub.wkbk==="words") renderWkbkWordSheets(); else renderWkbkTally(); }
+  if(v==="rf"){ if(state.sub.rf==="result"){rfProg();renderRfSheets();} else rfTally(); }
   if(v==="mt"){ if(state.sub.mt==="result"){renderProg();renderRunState();renderSheets();} else mtTally(); }
   if(v==="ps"){ if(state.sub.ps==="result"){renderProg();renderRunState();renderSheets();} else psTally(); }
   if(v==="basic"){ if(state.sub.basic==="result"){renderBasicProgress();renderBasicSheets();} else renderBasicTally(); }
@@ -8968,6 +9096,13 @@ document.addEventListener("click",async e=>{
   if(t.closest("#exam-print")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"q"),`${exTitle()} 문제지`);return}
   if(t.closest("#exam-printkey")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"a"),`${exTitle()} 정답 및 해설`);return}
   if(t.closest("#exam-save")){try{await document.fonts.ready}catch(_){} saveDoc(`${exTitle()} ${state.exam.tab==="a"?"정답 및 해설":"문제지"}`,exPages(state.examResult,state.exam.tab));return}
+  if(t.closest("#rf-run")){rfRun();return}
+  if(t.closest("#rf-retry")){rfRun(true);return}
+  if(t.closest("#rf-stop")){state.rf.run.ctl&&state.rf.run.ctl.abort();return}
+  if(t.closest("#rf-copy")){addRows("rf",filledRows("gen").map(r=>({...r})));return}
+  if(t.dataset.rftab){state.rfTab=t.dataset.rftab;renderView();return}
+  if(t.closest("#rf-print-q")||t.closest("#rf-print-a")){const k=t.closest("#rf-print-a")?"a":"q"; try{await document.fonts.ready}catch(_){} printPages(buildRfPages(k),`리딩 플로우 ${k==="a"?"해설지":"문제지"}`);return}
+  if(t.closest("#rf-save-q")||t.closest("#rf-save-a")){const k=t.closest("#rf-save-a")?"a":"q"; try{await document.fonts.ready}catch(_){} saveDoc(`리딩 플로우 ${k==="a"?"해설지":"문제지"}`,buildRfPages(k));return}
   if(t.closest("#mt-run")){mtRun();return}
   if(t.closest("#mt-copy")){addRows("mt",filledRows("gen").map(r=>({...r})));return}
   if(t.dataset.mtset){state.mtCur=Number(t.dataset.mtset);renderView();return}
@@ -9046,6 +9181,7 @@ document.addEventListener("input",e=>{
   if(t.dataset.e2){state.exam[t.dataset.e2]=t.value;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500); const hp=$("#exam-headprev"); if(hp) hp.textContent=exHeadTitle(state.exam)||"(학교·시험 이름을 넣어 주세요)"; return}
   if(t.dataset.e2n){const v=Math.max(0,Math.min(20,parseInt(t.value,10)||0)); state.exam[t.dataset.e2n]=t.dataset.e2n==="maxPer"?Math.max(1,v):v; clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();return}
   if(t.dataset.exsc){const v=Math.max(1,Math.min(10,parseInt(t.value,10)||0)); if(v){state.exam.scores[t.dataset.exsc]=v;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();} return}
+  if(t.dataset.r2){state.rf[t.dataset.r2]=t.value;clearTimeout(draftT.rf);draftT.rf=setTimeout(()=>saveDraft("rf"),500);return}
   if(t.dataset.m2){state.mt[t.dataset.m2]=t.value;clearTimeout(draftT.mt);draftT.mt=setTimeout(()=>saveDraft("mt"),500);return}
   if(t.dataset.mtn){const lim=t.dataset.mtn==="sets"?[1,10]:[5,45]; state.mt[t.dataset.mtn]=Math.min(lim[1],Math.max(lim[0],parseInt(t.value)||lim[0])); LS.set("bj-mt-opts",{sets:state.mt.sets,per:state.mt.per}); mtTally(); return}
   if(t.dataset.p2){state.ps[t.dataset.p2]=t.value;clearTimeout(draftT.ps);draftT.ps=setTimeout(()=>saveDraft("ps"),500);return}
@@ -9088,6 +9224,7 @@ document.addEventListener("change",e=>{
   if(t.id==="wkbk-tfans"){state.wkbk.tfAns=t.checked;renderWkbkSheets();return}
   if(t.id==="wwd-merge"||t.id==="wwd-shuffle"||t.id==="wwd-ex"||t.id==="wwd-key"){ const wd=state.wkbk.wd; wd[t.id.slice(4)]=t.checked; renderWkbkWordSheets(); return }
   if(t.dataset&&t.dataset.wwoff){ const [di,wi]=t.dataset.wwoff.split(":").map(Number); const w=state.wkbkResult&&state.wkbkResult.docs[di]&&state.wkbkResult.docs[di].words[wi]; if(w){ w.off=!t.checked; LS.set("bj-wkbk-last",state.wkbkResult); renderWkbkWordSheets(); } return }
+  if(t.id==="rf-pass"){state.rf.showPass=t.checked;renderRfSheets();return}
   if(t.id==="basic-key"){state.basic.key=t.checked;renderBasicSheets();return}
   if(t.dataset&&t.dataset.extype){const id=t.dataset.extype; const E=state.exam; E.types=t.checked?[...EX_TYPES.map(x=>x.id).filter(x=>E.types.includes(x)||x===id)]:E.types.filter(x=>x!==id); exSaveDraft(); t.closest(".exchk").classList.toggle("on",t.checked); const h=document.querySelector(".exgrid").closest(".card").querySelector("h3 small"); if(h) h.textContent=E.types.length+"개 유형 선택"; return}
   if(t.id==="exam-grade"){state.exam.grade=t.value;exSaveDraft();const hp=$("#exam-headprev"); if(hp) hp.textContent=exHeadTitle(state.exam)||"(학교·시험 이름을 넣어 주세요)";return}
