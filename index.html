@@ -3362,7 +3362,7 @@ ${passageHeader(p)}
 [만들 것]
 1. gist — 이 글을 한마디로 정리한 한글 한두 문장(80자 이내). 글쓴이가 무엇을 말하려는 글인지가 드러나야 합니다.
 2. bg — 이 글의 배경과 의도를 자세히 풀어 쓴 한글 설명 3가지(각 2~3문장, 70~170자). 학생이 "이 사람이 왜 이런 글을 썼고 나에게 무엇을 바라는지"를 알아야 글이 이해되기 때문입니다.
- - background: 이 글을 쓰게 된 배경(어떤 상황·분야·사회 현상·일반 상식에서 나온 이야기인지)과, 글을 이해하는 데 필요한 배경 지식(핵심 개념이 무엇인지, 학생이 모를 만한 용어·상황 풀이)을 설명합니다. 지문에 드러난 상황과 널리 알려진 일반 상식만 쓰고, 필자·기관·수치 등 지문에 없는 구체적 사실은 지어내지 않습니다.
+ - background: 이 글의 '출처와 뿌리'를 설명합니다. ① 이 글이 어떤 종류의 글에서 나왔는지(책의 어느 분야, 신문·잡지 칼럼, 학술 연구 소개, 안내문, 이야기 등)와 ② 어떤 학문·이론·사회 현상·역사적 사건·이야기에서 파생된 내용인지(예: '도덕적 면허 효과'라는 심리학 연구, 자본주의와 환경 문제를 다루는 사회학 논의)를 풀어 줍니다. 학생이 모를 만한 핵심 개념의 정체도 함께 알려 줍니다. 출처의 책 제목·저자·연도·기관·수치는 확실히 아는 널리 알려진 경우가 아니면 절대 지어내지 말고, 확실하지 않으면 '~분야의 글로 보인다', '~에 관한 논의에서 나온 내용이다'처럼 갈래와 분야까지만 씁니다.
  - why: 필자가 왜 이 글을 썼는지(문제 제기, 안내, 설득, 경험 공유, 정보 전달 등 쓴 동기)를 지문 근거로 설명합니다.
  - want: 필자가 독자에게 결국 무엇을 원하는지(알아 두길, 행동하길, 생각을 바꾸길, 공감하길 등)와 이 글이 말하려는 최종 메시지를 설명합니다.
  - 중요한 낱말은 한글 뒤 괄호에 영어(지문에 나온 그대로)를 붙입니다.
@@ -3448,7 +3448,7 @@ function buildRfPages(kind){
     const nm=`${d.no}${/^\d/.test(d.no)?"번":""}`;
     const mk=lv=>{
       const blocks=[{br:true,cat:nm,html:`<div class="rf-h"><b>${esc(nm)}</b><span>${esc(d.src||res.kicker||"")}${d.title_ko?` · ${esc(d.title_ko)}`:""}</span></div><div class="rf-i"><b>이 글을 한마디로</b><br>${esc(d.gist)}</div>`},
-        {cat:nm,html:`<div class="rf-bg"><div class="rf-sl">이 글의 배경과 의도</div><dl><dt>배경 지식</dt><dd>${esc(d.bg.background)}</dd><dt>왜 이 글을 썼나</dt><dd>${esc(d.bg.why)}</dd><dt>무엇을 원하나</dt><dd>${esc(d.bg.want)}</dd></dl></div>`}];
+        {cat:nm,html:`<div class="rf-bg"><div class="rf-sl">이 글의 배경과 의도</div><dl><dt>배경 지식 · 출처와 뿌리</dt><dd>${esc(d.bg.background)}</dd><dt>왜 이 글을 썼나</dt><dd>${esc(d.bg.why)}</dd><dt>무엇을 원하나</dt><dd>${esc(d.bg.want)}</dd></dl></div>`}];
       if(state.rf.showPass&&lv<3) blocks.push({cat:nm,html:`<div class="rf-pass">${inline(d.text)}</div>`});
       blocks.push({cat:nm,html:`<div class="rf-sl" style="margin-top:2mm">이 글을 이해하는 핵심 포인트</div>`});
       d.points.forEach((o,i)=>blocks.push({cat:nm,html:`<div class="rf-o"><span class="rf-n">${i+1}</span><span class="rf-t"><small class="tg">${esc(o.tag)}</small>${esc(o.t)}</span></div>`}));
