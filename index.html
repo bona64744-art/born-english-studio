@@ -526,6 +526,9 @@ body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var
 .rf-n{flex:none;width:6mm;font-weight:700;color:#1E4BD2}.rf-t{flex:1}.rf-t small{color:#1E4BD2;font-weight:700;margin-right:1mm}.rf-t small.tg{display:inline-block;font-size:7.4pt;font-weight:600;border:.25mm solid #9db0ec;border-radius:3mm;padding:0 1.6mm;margin-right:1.8mm;background:#f5f7ff;vertical-align:1px}.rf-t .why{display:block;font-size:8.2pt;color:#a33;margin-top:.6mm;font-weight:400}
 .rf-b{flex:none;font-size:8.4pt;color:#555;white-space:nowrap}
 .rf-bg{margin:2mm 0}.rf-bg dl{margin:0}.rf-bg dt{font-weight:700;font-size:9pt;color:#1E4BD2;margin-top:1.6mm}.rf-bg dd{margin:.4mm 0 0;font-size:9.4pt;line-height:1.55}
+.page.rf.t1 .rf-o{font-size:8.8pt;padding:1mm 0;line-height:1.42}.page.rf.t1 .rf-bg dd{font-size:8.8pt;line-height:1.45}.page.rf.t1 .rf-pass{font-size:7.6pt;line-height:1.42}
+.page.rf.t2 .rf-o{font-size:8.2pt;padding:.7mm 0;line-height:1.38}.page.rf.t2 .rf-bg dd{font-size:8.2pt;line-height:1.4}.page.rf.t2 .rf-pass{font-size:7pt;line-height:1.35}.page.rf.t2 .rf-i{font-size:8.4pt}
+.page.rf.t3 .rf-o{font-size:8pt;padding:.6mm 0;line-height:1.35}.page.rf.t3 .rf-bg dd{font-size:8pt;line-height:1.38}
 .rf-seq,.rf-ans{margin-top:2.5mm}.rf-sl{font-weight:700;font-size:9.4pt;margin-bottom:1.6mm}
 .rf-boxes{display:flex;flex-wrap:wrap;align-items:center;gap:1.2mm}.rf-boxes em{font-style:normal;color:#888;font-size:9pt}
 .rf-box{display:inline-flex;width:9mm;height:9mm;border:.35mm solid #333;border-radius:1mm;align-items:flex-start;justify-content:flex-start;font-size:10pt;font-weight:700}
@@ -3354,20 +3357,20 @@ const RF_CIRC=["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪"
 state.rf=(()=>{ const d=LS.get("bj-rf-draft",null); return {kicker:(d&&d.kicker)||"", rows:(d&&d.rows)||[emptyRow()], savedAt:(d&&d.savedAt)||null, showPass:true, run:{running:false,done:0,total:0,ctl:null}}; })();
 state.rfResult=null; state.rfTab="q";
 function rfPrompt(p){
-  return `당신은 영어 지문의 내용을 이해하는 데 어려움을 겪는 학생(하위권)을 가르치는 강사입니다. 학생이 이 지문 하나를 읽기 전에(또는 읽으면서) 이 자료의 '이해 포인트 20개'만 읽어도 지문의 내용·흐름·핵심·글쓴이의 의도를 완벽히 이해할 수 있도록 알차게 풀어 쓴 '리딩 플로우'를 만듭니다.
+  return `당신은 영어 지문의 내용을 이해하는 데 어려움을 겪는 학생(하위권)을 가르치는 강사입니다. 학생이 이 지문 하나를 읽기 전에(또는 읽으면서) 이 자료의 '이해 포인트'만 읽어도 지문의 내용·흐름·핵심·글쓴이의 의도를 완벽히 이해할 수 있도록 알차게 풀어 쓴 '리딩 플로우'를 만듭니다.
 ${passageHeader(p)}
 [만들 것]
 1. gist — 이 글을 한마디로 정리한 한글 한두 문장(80자 이내). 글쓴이가 무엇을 말하려는 글인지가 드러나야 합니다.
-2. bg — 이 글의 배경과 의도를 자세히 풀어 쓴 한글 설명 3가지(각 2~4문장, 90~260자). 학생이 "이 사람이 왜 이런 글을 썼고 나에게 무엇을 바라는지"를 알아야 글이 이해되기 때문입니다.
+2. bg — 이 글의 배경과 의도를 자세히 풀어 쓴 한글 설명 3가지(각 2~3문장, 70~170자). 학생이 "이 사람이 왜 이런 글을 썼고 나에게 무엇을 바라는지"를 알아야 글이 이해되기 때문입니다.
  - background: 이 글을 쓰게 된 배경(어떤 상황·분야·사회 현상·일반 상식에서 나온 이야기인지)과, 글을 이해하는 데 필요한 배경 지식(핵심 개념이 무엇인지, 학생이 모를 만한 용어·상황 풀이)을 설명합니다. 지문에 드러난 상황과 널리 알려진 일반 상식만 쓰고, 필자·기관·수치 등 지문에 없는 구체적 사실은 지어내지 않습니다.
  - why: 필자가 왜 이 글을 썼는지(문제 제기, 안내, 설득, 경험 공유, 정보 전달 등 쓴 동기)를 지문 근거로 설명합니다.
  - want: 필자가 독자에게 결국 무엇을 원하는지(알아 두길, 행동하길, 생각을 바꾸길, 공감하길 등)와 이 글이 말하려는 최종 메시지를 설명합니다.
  - 중요한 낱말은 한글 뒤 괄호에 영어(지문에 나온 그대로)를 붙입니다.
-3. points — 정확히 20개. 지문의 처음부터 끝까지 이야기가 흐르는 순서대로, 지문의 모든 중요한 내용을 빠짐없이 담습니다.
+3. points — 주요 내용 위주로 8~20개(꼭 20개를 채울 필요는 없습니다). 이 자료는 A4 한 쪽에 지문 하나가 모두 들어가야 하므로 gist·bg·points를 합쳐 한글 1,600자 안팎을 넘지 않게 합니다(짧은 지문은 8~12개, 긴 지문도 20개 이하). 지문의 처음부터 끝까지 이야기가 흐르는 순서대로, 중요한 내용은 빠뜨리지 않되 사소한 내용은 과감히 묶거나 뺍니다.
  - tag: 그 포인트의 역할을 나타내는 한글 낱말 1개(배경·상황·주제 제시·원인·이유·예시·설명·대조·반전·결과·주장·조건·부탁·결론·마무리 중에서 알맞은 것).
- - t: 한글로 풀어 쓴 설명 1~2문장(40~110자). 지문의 문장이 무슨 뜻인지, 앞 문장과 어떻게 이어지는지(왜·그래서·하지만), 글쓴이가 그 말을 하는 이유까지 학생이 바로 이해되도록 풉니다. 지문의 숨은 뜻이나 앞뒤 논리가 어려운 곳은 더 친절히 설명합니다.
+ - t: 한글로 풀어 쓴 설명 1~2문장(35~90자). 지문의 문장이 무슨 뜻인지, 앞 문장과 어떻게 이어지는지(왜·그래서·하지만), 글쓴이가 그 말을 하는 이유까지 학생이 바로 이해되도록 풉니다. 지문의 숨은 뜻이나 앞뒤 논리가 어려운 곳은 더 친절히 설명합니다.
 4. 영어 낱말: 설명하다가 중요한 낱말·표현은 한글 바로 뒤 괄호 안에 영어를 지문에 나온 그대로 적습니다. 포인트마다 1~3개. 예) 학교 축제(festival)가 10월 14일에 열린다. 괄호 속 영어는 반드시 지문에 있는 낱말(필요하면 원형)이어야 합니다. 영어 문장을 통째로 옮기지 않습니다. 어려운 구문·접속어(because, instead, however 등)가 논리의 열쇠라면 그 영어를 괄호에 넣고 우리말로 무슨 역할을 하는지 풀어 줍니다.
-5. 20개를 이어 읽으면 지문 전체가 완벽히 이해되어야 합니다. 같은 내용을 반복하지 말고, 지문이 짧으면 한 문장을 '상황 → 속뜻 → 그래서' 식으로 나누어 20개를 채웁니다. 지문이 길면 한 포인트에 여러 문장의 핵심을 묶습니다.
+5. points를 이어 읽으면 지문 전체가 완벽히 이해되어야 합니다. 같은 내용을 반복하지 말고, 같은 내용을 억지로 늘리지 않습니다. 지문이 길면 한 포인트에 여러 문장의 핵심을 묶습니다.
 [규칙] 지문에 없는 사실·수치·의견을 지어내지 않습니다. 중학교 2학년이 이해하는 쉬운 우리말로, 선생님이 옆에서 설명해 주는 말투(~해요 대신 ~한다 체)로 씁니다.
 [출력] 설명 없이 JSON 하나만: {"title_ko":"지문을 한 줄로 요약한 한글 제목","gist":"한마디 정리","bg":{"background":"…","why":"…","want":"…"},"points":[{"tag":"배경","t":"한글 설명(영어 낱말)"}]}`;
 }
@@ -3379,15 +3382,15 @@ function rfNorm(r,text){
   r.points.forEach(o=>{ if(!o) return; let t=String(o.t||"").replace(/\s+/g," ").trim(); if(t.length<14||!ko(t)) return; t=fixParen(t).slice(0,200);
     const k=t.replace(/[^가-힣A-Za-z0-9]/g,""); if(seen.has(k)) return; seen.add(k);
     pts.push({tag:String(o.tag||"").replace(/\s+/g,"").slice(0,6)||"설명",t}); });
-  if(pts.length<18) return null;
+  if(pts.length<6) return null;
   const gist=String(r.gist||"").replace(/\s+/g," ").trim().slice(0,140); if(!ko(gist)) return null;
   const g=r.bg&&typeof r.bg==="object"?r.bg:{}, bg={};
-  for(const k of ["background","why","want"]){ const v=fixParen(String(g[k]||"").replace(/\s+/g," ").trim()).slice(0,420); if(v.length<40||!ko(v)) return null; bg[k]=v; }
+  for(const k of ["background","why","want"]){ const v=fixParen(String(g[k]||"").replace(/\s+/g," ").trim()).slice(0,300); if(v.length<30||!ko(v)) return null; bg[k]=v; }
   return {title_ko:String(r.title_ko||"").replace(/\s+/g," ").trim().slice(0,60),gist,bg,points:pts.slice(0,20)};
 }
 function rfTally(){
   const el=$("#rf-tally"); const rows=filledRows("rf");
-  if(el) el.innerHTML=`지문 <b>${rows.length}</b>개${rows.length?` · 지문마다 이해 포인트 20개 · 예상 약 ${Math.max(1,Math.ceil(rows.length/4))}분`:""}`;
+  if(el) el.innerHTML=`지문 <b>${rows.length}</b>개${rows.length?` · 지문마다 A4 한 쪽 · 예상 약 ${Math.max(1,Math.ceil(rows.length/4))}분`:""}`;
   const b=$("#rf-run"); if(b) b.disabled=!rows.length||state.rf.run.running||(sampleChecked&&!sample);
 }
 function rfProg(){
@@ -3396,7 +3399,7 @@ function rfProg(){
   el.innerHTML=r.running?`만들고 있습니다. ${docs.filter(d=>d.status==="done"||d.status==="error").length}/${docs.length}개 지문 <button class="link danger" type="button" id="rf-stop">중지</button>`:(bad?`${bad}개 지문은 만들지 못했습니다. <button class="link" type="button" id="rf-retry">다시 만들기</button>`:"");
 }
 function viewRf(){
-  const head=`<div class="phead"><div><h1>리딩 플로우</h1><p>내용 이해가 어려운 학생을 위한 자료입니다. 지문마다 이해 포인트 20개를 한글로 풀어 주고, 핵심 낱말 옆에 영어를 붙입니다. 이 20개만 읽어도 지문 전체를 이해할 수 있도록 만듭니다.</p></div><span class="spacer"></span>${subTabs("rf",[["new","새로 만들기"],["result","결과"]])}</div>`;
+  const head=`<div class="phead"><div><h1>리딩 플로우</h1><p>내용 이해가 어려운 학생을 위한 자료입니다. 지문마다 한 쪽에 핵심 이해 포인트를 한글로 풀어 주고, 핵심 낱말 옆에 영어를 붙입니다. 이 포인트만 읽어도 지문 전체를 이해할 수 있도록 만듭니다.</p></div><span class="spacer"></span>${subTabs("rf",[["new","새로 만들기"],["result","결과"]])}</div>`;
   if(state.sub.rf==="result") return head+`<div class="rbar"><label class="chk"><input type="checkbox" id="rf-pass"${state.rf.showPass?" checked":""}> 영어 지문 함께 인쇄</label><span class="spacer"></span>
     <button class="btn" type="button" id="rf-print-q">인쇄</button>${downloads?`<button class="btn" type="button" id="rf-save-q">저장</button>`:""}</div>
     <div class="rinfo" id="rf-prog"></div><div class="sheets" id="rf-sheets"></div>`;
@@ -3404,7 +3407,7 @@ function viewRf(){
   return head+`<div class="gen-right" style="max-width:1100px">
     <section class="card"><h3>기본 정보</h3>
       <label class="field" style="margin-top:14px"><span>머리말 <small>불러온 시험 이름으로 자동 입력 · 직접 고쳐도 됩니다</small></span><input data-r2="kicker" value="${esc(b.kicker)}" placeholder="예: 2026년 9월 고2 모의고사"></label>
-      <p class="hint" style="margin-top:12px">지문마다 한 쪽(길면 두 쪽)이 만들어집니다. 앞부분에 한 줄 핵심과 글의 배경 지식·쓴 이유·원하는 바가 나오고, 이어서 글이 흐르는 순서대로 20개의 이해 포인트가 나옵니다. 하위권 학생이 읽는 자료입니다.</p>
+      <p class="hint" style="margin-top:12px">지문마다 A4 한 쪽에 들어가도록 자동으로 맞춥니다(주요 내용 위주라 포인트 개수는 지문마다 다릅니다). 앞부분에 한 줄 핵심과 글의 배경 지식·쓴 이유·원하는 바가 나오고, 이어서 글이 흐르는 순서대로 이해 포인트가 나옵니다. 하위권 학생이 읽는 자료입니다.</p>
       <div class="savedat" data-saved="rf">${b.savedAt?`마지막 임시 저장: ${fmtTime(b.savedAt)}`:"입력한 내용은 자동으로 임시 저장됩니다."}</div></section>
     <section class="card"><h3>영어 지문 <small data-count="rf">${tableCount("rf")}</small></h3>
       ${dropZone("rf")}
@@ -3440,16 +3443,21 @@ async function rfRun(onlyBad){
 function buildRfPages(kind){
   const res=state.rfResult; if(!res) return [];
   const docs=res.docs.filter(d=>d.status==="done"); if(!docs.length) return [];
-  const blocks=[];
+  const out=[];
   docs.forEach(d=>{
     const nm=`${d.no}${/^\d/.test(d.no)?"번":""}`;
-    blocks.push({br:true,cat:nm,html:`<div class="rf-h"><b>${esc(nm)}</b><span>${esc(d.src||res.kicker||"")}${d.title_ko?` · ${esc(d.title_ko)}`:""}</span></div><div class="rf-i"><b>이 글을 한마디로</b><br>${esc(d.gist)}</div>`});
-    blocks.push({cat:nm,html:`<div class="rf-bg"><div class="rf-sl">이 글의 배경과 의도</div><dl><dt>배경 지식</dt><dd>${esc(d.bg.background)}</dd><dt>왜 이 글을 썼나</dt><dd>${esc(d.bg.why)}</dd><dt>무엇을 원하나</dt><dd>${esc(d.bg.want)}</dd></dl></div>`});
-    if(state.rf.showPass) blocks.push({cat:nm,html:`<div class="rf-pass">${inline(d.text)}</div>`});
-    blocks.push({cat:nm,html:`<div class="rf-sl" style="margin-top:2mm">이 글을 이해하는 20가지 포인트</div>`});
-    d.points.forEach((o,i)=>blocks.push({cat:nm,html:`<div class="rf-o"><span class="rf-n">${i+1}</span><span class="rf-t"><small class="tg">${esc(o.tag)}</small>${esc(o.t)}</span></div>`}));
+    const mk=lv=>{
+      const blocks=[{br:true,cat:nm,html:`<div class="rf-h"><b>${esc(nm)}</b><span>${esc(d.src||res.kicker||"")}${d.title_ko?` · ${esc(d.title_ko)}`:""}</span></div><div class="rf-i"><b>이 글을 한마디로</b><br>${esc(d.gist)}</div>`},
+        {cat:nm,html:`<div class="rf-bg"><div class="rf-sl">이 글의 배경과 의도</div><dl><dt>배경 지식</dt><dd>${esc(d.bg.background)}</dd><dt>왜 이 글을 썼나</dt><dd>${esc(d.bg.why)}</dd><dt>무엇을 원하나</dt><dd>${esc(d.bg.want)}</dd></dl></div>`}];
+      if(state.rf.showPass&&lv<3) blocks.push({cat:nm,html:`<div class="rf-pass">${inline(d.text)}</div>`});
+      blocks.push({cat:nm,html:`<div class="rf-sl" style="margin-top:2mm">이 글을 이해하는 핵심 포인트</div>`});
+      d.points.forEach((o,i)=>blocks.push({cat:nm,html:`<div class="rf-o"><span class="rf-n">${i+1}</span><span class="rf-t"><small class="tg">${esc(o.tag)}</small>${esc(o.t)}</span></div>`}));
+      return paginate(blocks,"q",{cls:"rf"+(lv?" t"+lv:""),brand:`리딩 플로우${res.kicker?" · "+res.kicker:""}`});
+    };
+    let pages=null; for(let lv=0;lv<=3;lv++){ pages=mk(lv); if(pages.length===1) break; }
+    out.push(...pages);
   });
-  return paginate(blocks,"q",{cls:"rf",brand:`리딩 플로우${state.rfResult.kicker?" · "+state.rfResult.kicker:""}`});
+  return out;
 }
 async function renderRfSheets(){
   const el=$("#rf-sheets"); if(!el) return; try{await document.fonts.ready}catch(e){}
