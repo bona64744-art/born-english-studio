@@ -518,7 +518,7 @@ body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var
 .q-src{font-size:7.4pt;color:#8a9099;margin-bottom:.8mm}
 .q-src .lvl{display:inline-block;margin-left:1.6mm;padding:0 1.3mm;border:.25mm solid #1E4BD2;border-radius:.8mm;color:#1E4BD2;font-size:6.6pt;line-height:1.5}
 /* ps */
-.page.ps .q-src{display:none}
+.page.ps .q-src,.page.mt .q-src{display:none}
 .page.ps .q .q-passage{font-size:8.4pt;line-height:1.5}
 .page.ps .ps-pass .q-passage{font-size:9pt;line-height:1.55;text-align:left}
 .ps-pass{border:.3mm solid #1E4BD2;border-radius:1.2mm;padding:2.6mm 3.2mm;background:#f5f7ff}
@@ -1627,7 +1627,7 @@ const LS = {
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){return} try{syncTouch(k)}catch(e){}}
 };
 /* ---------------- 기기 간 동기화: 초안·진행 중 작업·설정을 서버(db)에도 저장해 다른 컴퓨터에서 이어서 쓴다 ---------------- */
-const SYNC_KEYS=new Set(["bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
+const SYNC_KEYS=new Set(["bj-mt-draft","bj-mt-opts","bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
   "bj-wkbk-last","bj-cls-last","bj-ana-last","bj-basic-last","bj-exam-draft","bj-exam-last","bj-hs-draft","bj-hs-last","bj-cr-draft","bj-cr-last","bj-tb-draft","bj-tb-last","bj-ext","bj-ext-mid","jp-set","bj-bookgrammar","bj-cls-wb","bj-wkbk-acts","bj-settings","bj-att","bj-lg"]);
 const SYNC_TS_KEY="bj-sync-ts"; const _syncT={};
 function syncTs(){ try{return JSON.parse(localStorage.getItem(SYNC_TS_KEY)||"{}")||{}}catch(e){return {}} }
@@ -1688,7 +1688,7 @@ const anaDraft = LS.get("bj-ana-draft",null);
 const state = {
   view: saved.view || "gen",
   level: saved.level==="mid"?"mid":"high",
-  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new"},
+  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new", mt:"new"},
   genSel: new Set(),
   counts: saved.counts || {...DEFAULT_COUNTS,...MID_DEFAULT},
   folded: saved.folded || {},
@@ -1779,7 +1779,7 @@ function renderTable(key){
 }
 function tableCount(key){const n=filledRows(key).length;return `${n}/${rowsOf(key).length}개 입력 · 최대 30개`}
 /* 머리말 자동 입력: 불러온 지문의 시험 이름으로 채우되, 직접 고친 값은 건드리지 않습니다 */
-const KICK_SEL={ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
+const KICK_SEL={mt:"data-m2",ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
 function autoKick(key){
   const st=state[key]; if(!st||!st.rows||!KICK_SEL[key]) return;
   const el=document.querySelector(`[${KICK_SEL[key]}="kicker"]`); if(el&&document.activeElement===el) return;
@@ -1795,10 +1795,10 @@ function saveDraft(key){
   if(key==="hs"){ hsSaveDraft(); return; }
   if(key==="cr"){ crSaveDraft(); return; }
   state[key].savedAt=Date.now();
-  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
+  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft",mt:"bj-mt-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
   const el=document.querySelector(`[data-saved="${key}"]`); if(el) el.textContent=`마지막 임시 저장: ${fmtTime(state[key].savedAt)}`;
   const c=document.querySelector(`[data-count="${key}"]`); if(c) c.textContent=tableCount(key);
-  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally();
+  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally(); else if(key==="mt") mtTally();
 }
 function addRows(key,items){
   const rows=rowsOf(key);
@@ -2340,7 +2340,7 @@ function extrasFor(p,types){
 }
 function passageHeader(p){
   if(p.lvl==="mid") return `[지문] ${p.exam}${p.no?` ${p.no}`:""} (한국 중학교 교과서 본문 수준)\n<<<\n${p.text}\n>>>`;
-  return `[지문] ${p.exam}${p.no?` ${p.no}번`:""}${p.grade?` (${p.grade} 수준, 원 시험보다 한 단계 변별력 있게)`:""}\n<<<\n${p.text}\n>>>`;
+  return `[지문] ${p.exam}${p.no?` ${p.no}번`:""}${p.grade?` (${p.grade} 수준, 원 시험보다 한 단계 변별력 있게)`:""}\n<<<\n${p.text}\n>>>${p.diff?`\n\n[출제 난이도] ${p.diff}`:""}`;
 }
 /* exemplars: hand-checked demo items show the target quality in one shot */
 function exemplarsFor(types){
@@ -2889,7 +2889,7 @@ function measureSetup(ps){
   pxPerMm = $("#mref").getBoundingClientRect().height/100 || 3.7795;
 }
 function paginate(blocks,kind,popt){
-  measureSetup(!!popt);
+  measureSetup(!!popt&&popt.cls==="ps");
   const col=$("#mcol"); const colH=252*pxPerMm;
   const heights=blocks.map(b=>{col.innerHTML=b.html;let h=col.scrollHeight; if(h>colH){col.innerHTML=`<div class="squeeze">${b.html}</div>`;h=col.scrollHeight;b.squeeze=true} return h});
   col.innerHTML="";
@@ -2905,7 +2905,7 @@ function paginate(blocks,kind,popt){
     used+=h;
   });
   const s=state.set, academy=state.academy.trim();
-  return pages.map((p,i)=>`<div class="page${popt?" ps":""}"><div class="pg-head"><div class="pg-brand"><b>${popt?"지문별 시험지":s.level==="mid"?"중등 변형문제":"변형문제"}</b>${kind==="a"?"<span>정답 및 해설</span>":""}${!popt&&state.version!=="all"?`<span class="lv">${state.version} 버전</span>`:""}</div><div class="pg-src">${esc(s.title)}${academy?`<i>|</i>${esc(academy)}`:""}</div></div><div class="pg-body"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div><div class="pg-foot"><span>${esc(p.cat||"")}</span><span class="cp">${academy?esc(academy)+" 수업용 자료입니다. 무단 배포를 금합니다.":"수업용 자료입니다. 무단 배포를 금합니다."}</span><span>${i+1}</span></div></div>`);
+  return pages.map((p,i)=>`<div class="page${popt?" "+popt.cls:""}"><div class="pg-head"><div class="pg-brand"><b>${popt?popt.brand:s.level==="mid"?"중등 변형문제":"변형문제"}</b>${kind==="a"?"<span>정답 및 해설</span>":""}${!popt&&state.version!=="all"?`<span class="lv">${state.version} 버전</span>`:""}</div><div class="pg-src">${esc(s.title)}${academy?`<i>|</i>${esc(academy)}`:""}</div></div><div class="pg-body"><div class="col">${p.cols[0].join("")}</div><div class="col">${p.cols[1].join("")}</div></div><div class="pg-foot"><span>${esc(p.cat||"")}</span><span class="cp">${academy?esc(academy)+" 수업용 자료입니다. 무단 배포를 금합니다.":"수업용 자료입니다. 무단 배포를 금합니다."}</span><span>${i+1}</span></div></div>`);
 }
 function buildPages(kind){
   const list=orderedQs().map((q,i)=>({q,n:i+1}));
@@ -3291,11 +3291,11 @@ async function persistDraftMaterial(){
 const STATUS = {wait:["대기",""],gen:["문항 작성","busy"],proof:["교정","busy"],solve:["정답 재검증","busy"],repair:["보정","busy"],done:["완료","done"],error:["오류","err"],stopped:["중지","err"]};
 function renderProg(){
   const el=$("#prog"); if(!el) return;
-  const groups={}; state.units.forEach(u=>{(groups[u.p.no]=groups[u.p.no]||[]).push(u)});
+  const groups={}; state.units.forEach(u=>{const k=u.mt?u.mt.set+"회":u.p.no; (groups[k]=groups[k]||[]).push(u)});
   el.innerHTML=Object.entries(groups).map(([no,us])=>{
     const st=us.some(u=>u.status==="error"||u.status==="stopped")?"err":us.every(u=>u.status==="done")?"done":us.some(u=>STATUS[u.status][1]==="busy")?"busy":"";
     const txt=us.map(u=>STATUS[u.status][0]); const done=txt.filter(x=>x==="완료").length;
-    return `<li class="${st}" title="${esc(us.map(u=>u.error||"").filter(Boolean).join(" "))}"><b>${esc(no)}${/^\d/.test(no)?"번":""}</b>${st==="done"?"완료":st==="err"?"오류":`${done}/${us.length}`}</li>`;
+    return `<li class="${st}" title="${esc(us.map(u=>u.error||"").filter(Boolean).join(" "))}"><b>${esc(no)}${/^\d+$/.test(no)?"번":""}</b>${st==="done"?"완료":st==="err"?"오류":`${done}/${us.length}`}</li>`;
   }).join("");
 }
 function renderRunState(){
@@ -3308,7 +3308,7 @@ function assembleSet(){
   const qs=state.units.flatMap(u=>u.questions||[]);
   state.set={...state.set,questions:qs,demo:false};
   LS.set("jp-set",state.set);
-  if((state.view==="gen"&&state.sub.gen==="result")||(state.view==="ps"&&state.sub.ps==="result")) renderSheets();
+  if((state.view==="gen"&&state.sub.gen==="result")||(state.view==="ps"&&state.sub.ps==="result")||(state.view==="mt"&&state.sub.mt==="result")) renderSheets();
   const c=$("#cnt-result"); if(c) c.textContent=orderedQs().length||"";
 }
 function startRun(){
@@ -3333,6 +3333,109 @@ async function createDraftMaterial(total){
   }catch(e){}
 }
 
+
+
+/* ================= 모의고사 회차 (지문당 1문항 · 유형 무작위 · 회차별 난이도) ================= */
+const MT_LANG=new Set(["topic","title","purpose","claim","mismatch"]);
+const MT_TIERS=[
+ {upto:3,level:"하",name:"중간",diff:"중간 난이도(실제 고2·고3 모의고사 평균 수준). 정답 근거가 본문에 분명하되, 오답은 본문 어휘를 쓴 그럴듯한 함정으로 만들 것. 선택지는 본문 표현을 그대로 베끼지 말고 바꿔 쓸 것.",
+  w:{blank:4,summary:2,irrelevant:1,order:2,insert:2,grammar_wrong:1,vocab_wrong:1,implication:1,topic:2,gist:1,title:2,mismatch:2,claim:1,purpose:1}},
+ {upto:6,level:"상",name:"상향",diff:"조금 더 어려운 난이도. 정답과 오답이 비슷해 보여 문장 사이 논리와 세부 표현까지 읽어야 풀리게 할 것. 오답은 지엽적 내용·과잉 일반화·반대 방향 진술을 섞고, 선택지는 모두 본문을 추상화·바꿔 쓸 것.",
+  w:{blank:5,summary:2,irrelevant:1,order:2,insert:2,grammar_wrong:1,vocab_wrong:1,implication:2,topic:1,gist:1,title:1,mismatch:1,claim:1}},
+ {upto:10,level:"상",name:"고난도",diff:"고난도(수능 킬러 문항 수준). 추상적 논지와 함축, 문장 간 논리 전개를 끝까지 따라가야 풀리게 하고, 매력적인 오답(본문의 일부만 맞거나 논리 방향이 반대인 선택지)을 반드시 포함할 것. 선택지는 본문 어휘를 쓰지 않고 상위 개념으로 바꿔 쓸 것. 쉽게 소거되는 오답은 금지.",
+  w:{blank:6,summary:3,irrelevant:1,order:2,insert:3,grammar_wrong:1,vocab_wrong:1,implication:3,topic:1,gist:1,title:1,mismatch:1}}];
+const MT_LANG_ALL={blank:1,summary:1,irrelevant:1,order:1,insert:1,grammar_wrong:1,vocab_wrong:1,implication:1,topic:1,gist:1,title:1,mismatch:1,claim:1,purpose:1};
+const mtTier=n=>MT_TIERS.find(t=>n<=t.upto)||MT_TIERS[2];
+state.mt=(()=>{ const d=LS.get("bj-mt-draft",null), o=LS.get("bj-mt-opts",null)||{}; return {kicker:(d&&d.kicker)||"", rows:(d&&d.rows)||[emptyRow()], savedAt:(d&&d.savedAt)||null, sets:Math.min(10,Math.max(1,parseInt(o.sets)||10)), per:Math.min(45,Math.max(5,parseInt(o.per)||22))}; })();
+state.mtCur=1;
+function mtShuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function mtPlan(setNo,n,used,uses){
+  const tier=mtTier(setNo), pool=[]; Object.entries(tier.w).forEach(([id,c])=>{ for(let i=0;i<c;i++) pool.push(id); });
+  const ids=Object.keys(tier.w); while(pool.length<n) pool.push(ids[Math.floor(Math.random()*ids.length)]);
+  let types=mtShuffle(pool.slice()).slice(0,n);
+  const order=mtShuffle([...uses.keys()]).sort((a,b)=>uses[a]-uses[b]).slice(0,n); mtShuffle(order);
+  const out=[];
+  order.forEach(ri=>{
+    let k=types.findIndex(t=>!used[ri].has(t)), id;
+    if(k>=0) id=types.splice(k,1)[0];
+    else{
+      const alt=ids.filter(t=>!used[ri].has(t)); const more=Object.keys(MT_LANG_ALL).filter(t=>!used[ri].has(t)&&!ids.includes(t));
+      id=alt.length?alt[Math.floor(Math.random()*alt.length)]:more.length?more[Math.floor(Math.random()*more.length)]:null;
+      if(id===null){ used[ri].clear(); id=types[0]; }
+      types.splice(types.indexOf(id)>=0?types.indexOf(id):0,1);
+    }
+    used[ri].add(id); uses[ri]++; out.push({ri,id});
+  });
+  return out;
+}
+function mtSets(){
+  const m={}; (state.units||[]).forEach(u=>{ if(!u.mt) return; (m[u.mt.set]=m[u.mt.set]||[]); (u.questions||[]).filter(q=>q.ok&&T[q.type]).forEach(q=>m[u.mt.set].push({pos:u.mt.pos,q})); });
+  Object.keys(m).forEach(k=>{ m[k].sort((a,b)=>a.pos-b.pos); if(!m[k].length) delete m[k]; });
+  return m;
+}
+function mtTally(){
+  const el=$("#mt-tally"); const rows=filledRows("mt"), b=state.mt, n=Math.min(b.per,rows.length);
+  if(el) el.innerHTML=`<b>${b.sets}</b>회 × <b>${n}</b>문항 <small>(지문 ${rows.length}개${rows.length&&rows.length<b.per?` · 지문이 ${b.per}개보다 적어 회당 ${rows.length}문항`:""})</small><br><small>${rows.length?`총 ${b.sets*n}문항 · 한 회에 지문당 1문항`:"지문을 넣어 주세요"}</small>`;
+  const btn=$("#mt-run"); if(btn) btn.disabled=!rows.length||state.running||(sampleChecked&&!sample);
+}
+function viewMt(){
+  const head=`<div class="phead"><div><h1>모의고사 회차</h1><p>지문을 넣으면 실제 모의고사처럼 회차별 시험지를 만듭니다. 한 회에서 지문마다 문제는 한 번만 나오고, 유형과 순서는 무작위입니다. 회차가 올라갈수록 어려워집니다(1~3 중간, 4~6 상향, 7~10 고난도).</p></div><span class="spacer"></span>${subTabs("mt",[["new","새로 만들기"],["result","결과"]])}</div>`;
+  if(state.sub.mt==="result"){
+    const sets=mtSets(), keys=Object.keys(sets).map(Number); const cur=sets[state.mtCur]?state.mtCur:keys[0];
+    const tabs=Array.from({length:state.mtN||keys.length},(_,i)=>i+1).map(k=>`<button type="button" data-mtset="${k}" aria-selected="${k===cur}">${k}회${sets[k]?` <small>${sets[k].length}</small>`:""}</button>`).join("");
+    return head+`<div class="rbar"><div class="subtabs">${tabs}</div></div>
+      <div class="rbar"><div class="subtabs">${[["q","문제지"],["a","해설지"],["log","교정 기록"]].map(([k,l])=>`<button type="button" data-rtab="${k}" aria-selected="${state.tab===k}">${l}</button>`).join("")}</div><span class="spacer"></span>
+      <button class="btn" type="button" id="mt-print-q">이 회 문제지 인쇄</button><button class="btn" type="button" id="mt-print-a">이 회 해설지 인쇄</button><button class="btn" type="button" id="mt-print-all">전체 문제지 인쇄</button><button class="btn" type="button" id="mt-print-alla">전체 해설지 인쇄</button>${downloads?`<button class="btn" type="button" id="mt-save-q">이 회 문제지 저장</button><button class="btn" type="button" id="mt-save-a">이 회 해설지 저장</button>`:""}</div>
+      <div class="rinfo"><strong>${esc((state.set&&state.set.title)||"모의고사")}</strong>${state.running?" · 만드는 중":""} <button class="link danger" type="button" id="stop"${state.running?"":" hidden"}>중지</button><button class="link" type="button" id="retry" hidden>오류 난 문항 다시 만들기</button></div>
+      <ul class="prog" id="prog"></ul><div class="sheets" id="sheets"></div>`;
+  }
+  const b=state.mt;
+  return head+`<div class="gen-right" style="max-width:1100px">
+    <section class="card"><h3>기본 정보</h3>
+      <label class="field" style="margin-top:14px"><span>머리말 <small>예: 2026 고2 모의고사 변형 · 불러온 시험 이름으로 자동 입력</small></span><input data-m2="kicker" value="${esc(b.kicker)}" placeholder="2026 고2 모의고사 변형"></label>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">
+        <label class="field" style="width:160px"><span>회차 수 <small>1~10</small></span><input type="number" min="1" max="10" data-mtn="sets" value="${b.sets}"></label>
+        <label class="field" style="width:160px"><span>회당 문항 수 <small>5~45</small></span><input type="number" min="5" max="45" data-mtn="per" value="${b.per}"></label></div>
+      <p class="hint" style="margin-top:12px">지문은 회당 문항 수 이상 넣어 주세요(실제 모의고사처럼 한 회에 지문 하나당 문제 하나). 지문이 더 많으면 회마다 다른 지문 조합이 쓰이고, 같은 지문에는 회차마다 다른 유형이 나옵니다. 서술형은 포함하지 않습니다.</p>
+      <div class="savedat" data-saved="mt">${b.savedAt?`마지막 임시 저장: ${fmtTime(b.savedAt)}`:"입력한 내용은 자동으로 임시 저장됩니다."}</div></section>
+    <section class="card"><h3>영어 지문 <small data-count="mt">${tableCount("mt")}</small></h3>
+      ${dropZone("mt")}
+      ${renderTable("mt")}
+      <div class="tablebar"><button class="btn" type="button" data-addrow="mt">+ 지문 추가</button><button class="btn" type="button" data-import="mt">모의고사 지문 불러오기</button><button class="btn" type="button" id="mt-copy">변형문제 지문 가져오기</button></div></section>
+    <div class="runbar"><div class="tally" id="mt-tally"></div><span class="spacer"></span><button class="btn primary big" type="button" id="mt-run">모의고사 만들기</button></div>
+  </div>`;
+}
+function mtRun(){
+  if(!sample){toast("이 페이지를 Claude 안에서 열어야 문제를 만들 수 있습니다.");return}
+  const rows=filledRows("mt"); if(!rows.length){toast("지문을 넣어 주세요.");return}
+  const b=state.mt, n=Math.min(b.per,rows.length);
+  if(state.set&&!state.set.demo&&Array.isArray(state.set.questions)&&state.set.questions.some(q=>q.ok)){
+    state.prevQs=[...(state.prevQs||[]),...state.set.questions.filter(q=>q.ok&&q.orig)].slice(-300);
+  }
+  state.level="high"; posCount=[0,0,0,0,0]; state.tab="q"; state.mtCur=1; state.mtN=b.sets;
+  const stamp=Date.now().toString(36), used=rows.map(()=>new Set()), uses=rows.map(()=>0), units=[];
+  for(let k=1;k<=b.sets;k++){
+    const tier=mtTier(k);
+    mtPlan(k,n,used,uses).forEach((x,pos)=>{
+      const r=rows[x.ri];
+      const P={key:`mt${k}_${pos}_${stamp}`,grade:/[고중][123]/.exec(r.src||b.kicker||"")?.[0]||"",no:(r.title||"").replace(/번$/,"")||String(x.ri+1),exam:r.src||b.kicker||"지문",text:tidyBreaks(r.text),kind:"",lvl:"high",diff:tier.diff};
+      P.parts=[P.text];
+      units.push({id:`${P.key}`,p:P,types:[itemOf(x.id,tier.level,MT_LANG.has(x.id)?"en":undefined)],status:"wait",questions:[],mt:{set:k,pos}});
+    });
+  }
+  state.units=units;
+  state.set={title:(b.kicker||"").trim()||"모의고사",demo:false,questions:[],created:Date.now(),total:units.length,level:"high",mode:"mt"};
+  state.sub.mt="result"; renderView();
+  runUnits(units);
+}
+function buildMtPages(kind,setNo){
+  const sets=mtSets(), list=(sets[setNo]||[]).map((x,i)=>({q:x.q,n:i+1}));
+  if(!list.length) return [];
+  const brand=`${(state.mt.kicker||"").trim()?state.mt.kicker.trim()+" · ":""}모의고사 ${setNo}회`;
+  const blocks=kind==="q"?list.map(x=>({cat:`${setNo}회`,html:qHTML(x.q,x.n)})):[...keyHTML(list),...list.map(x=>({cat:"정답 및 해설",html:aHTML(x.q,x.n)}))];
+  return paginate(blocks,kind,{cls:"mt",brand});
+}
+function buildMtAll(kind){ return Object.keys(mtSets()).flatMap(k=>buildMtPages(kind,Number(k))); }
 
 /* ================= 지문별 시험지 (지문 → 그 지문의 문제, 유형은 중요도 순) ================= */
 const PS_TYPES=[["topic","글의 주제","하","en"],["gist","글의 요지","하",""],["title","글의 제목","하","en"],["blank","빈칸 추론","상",""],["grammar_wrong","어법 · 틀린 것","하",""],["vocab_wrong","어휘 · 부적절","하",""],["mismatch","내용 불일치","하","en"],["summary","요약문 완성","상",""],["implication","함축 의미","상",""],["irrelevant","무관한 문장","하",""]];
@@ -3402,7 +3505,7 @@ function buildPsPages(kind){
       list.forEach(x=>blocks.push({cat:numTxt(g),html:aHTML(x.q,x.n)}));
     }
   });
-  return paginate(blocks,kind,true);
+  return paginate(blocks,kind,{cls:"ps",brand:"지문별 시험지"});
 }
 
 /* ================= analysis (지문 분석서) ================= */
@@ -4110,7 +4213,7 @@ function pdfModalHTML(m){
 }
 /* drag events */
 let dragDepth=0;
-function dropKey(){ if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
+function dropKey(){ if(state.view==="mt"&&state.sub.mt==="new") return "mt"; if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
 document.addEventListener("dragenter",e=>{ if(!dropKey()||!e.dataTransfer||![...e.dataTransfer.types].includes("Files")) return; dragDepth++; document.body.classList.add("dragging"); });
 document.addEventListener("dragleave",e=>{ if(!dropKey()) return; dragDepth=Math.max(0,dragDepth-1); if(!dragDepth) document.body.classList.remove("dragging"); });
 document.addEventListener("dragover",e=>{ if(dropKey()&&e.dataTransfer&&[...e.dataTransfer.types].includes("Files")){ e.preventDefault(); e.dataTransfer.dropEffect="copy"; } });
@@ -8495,6 +8598,7 @@ const ICONS={
   cr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 3 5 13.500h6L10 21l8-10.500h-6z"/></svg>',
   hs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.500 5.500-1.500 8-.5V18c-2.500-1-5.500-1-8 .5-2.500-1.500-5.500-1.500-8-.5z"/><path d="M12 6v12.500"/></svg>',
   exam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>',
+  mt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M12 9h6M12 13h6M12 17h4"/></svg>',
   ps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
   basic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4 3 8l9 4 9-4-9-4z"/><path d="M6 10v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>',
   ana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>',
@@ -8505,11 +8609,11 @@ const ICONS={
   att:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M9 3v4M15 3v4M8 14.5l2 2 4-4"/></svg>',
   set:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>'
 };
-const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
+const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],mt:["학습","모의고사 회차"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
 function renderNav(){
   const item=(v)=>`<button type="button" data-view="${v}"${state.view===v?' aria-current="page"':""}>${ICONS[v]}<span>${VIEWS[v][1]}</span>${v==="mat"&&state.materials.length?`<span class="badge">${state.materials.length}</span>`:v==="lib"?`<span class="badge">${allExams().length}</span>`:""}</button>`;
   const itemLv=lv=>`<button type="button" data-view="gen" data-level="${lv}"${state.view==="gen"&&state.level===lv?' aria-current="page"':""}>${ICONS.gen}<span>${lv==="mid"?"중등 변형문제":"고등 변형문제"}</span></button>`;
-  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("exam")}${item("cr")}${item("cls")}${item("wkbk")}${item("basic")}${item("tb")}${item("hs")}${item("ana")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
+  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("mt")}${item("exam")}${item("cr")}${item("cls")}${item("wkbk")}${item("basic")}${item("tb")}${item("hs")}${item("ana")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
   const [g,n0]=VIEWS[state.view]; const n=state.view==="gen"?levelName()+" 변형문제":n0; $("#crumb").innerHTML=`${g}<i>/</i><b>${n}</b>`;
   $("#who").innerHTML=`<span>관리자</span><b>${esc(state.academy||"학원")}</b><span class="av">${esc((state.academy||"B").trim().charAt(0))}</span>`;
 }
@@ -8636,6 +8740,13 @@ async function renderSheets(){
     el.innerHTML=pages.map((p,i)=>`<div class="frame"><span class="pageno">${i+1} / ${pages.length}</span>${p}</div>`).join(""); fitScale("#sheets");
     const c=$("#cnt-result"); if(c) c.textContent=gs.reduce((a,g)=>a+g.qs.length,0); return;
   }
+  if(state.view==="mt"){
+    const sets=mtSets(); const keys=Object.keys(sets);
+    if(!keys.length){el.innerHTML=`<div class="empty"><h3>${state.running?"교정이 끝난 문항부터 조판됩니다":"아직 조판할 문항이 없습니다"}</h3><p>${state.running?"잠시만 기다려 주세요.":"새로 만들기에서 지문을 넣어 주세요."}</p></div>`;return}
+    const cur=sets[state.mtCur]?state.mtCur:Number(keys[0]);
+    const pages=buildMtPages(state.tab==="a"?"a":"q",cur);
+    el.innerHTML=pages.map((p,i)=>`<div class="frame"><span class="pageno">${i+1} / ${pages.length}</span>${p}</div>`).join(""); fitScale("#sheets"); return;
+  }
   const qs=orderedQs();
   if(!qs.length){el.innerHTML=`<div class="empty"><h3>${state.running?"교정이 끝난 문항부터 조판됩니다":"아직 조판할 문항이 없습니다"}</h3><p>${state.running?"잠시만 기다려 주세요.":"새로 만들기에서 지문과 세트를 정해 주세요."}</p></div>`;return}
   const pages=buildPages(state.tab);
@@ -8710,6 +8821,7 @@ function renderView(){
   else if(v==="tb") html=viewTb();
   else if(v==="basic") html=viewBasic();
   else if(v==="ps") html=viewPs();
+  else if(v==="mt") html=viewMt();
   else if(v==="mat") html=viewMat();
   else if(v==="lib") html=`<div class="phead"><div><h1>원본 보관함</h1><p>모의고사 원본 지문을 연도별로 보관합니다. 변형문제·분석서의 '모의고사 지문 불러오기'에서 바로 씁니다.</p></div></div>`+renderLib();
   else if(v==="notes") html=`<div class="phead"><div><h1>교정 노트</h1></div></div><div style="max-width:980px">${renderLessons()}</div>`;
@@ -8721,6 +8833,7 @@ function renderView(){
   if(v==="ana"&&state.sub.ana==="new") renderAnaTally();
   if(v==="cls"){ if(state.sub.cls==="result"){renderClsProgress();renderClsSheets();} else renderClsTally(); }
   if(v==="wkbk"){ if(state.sub.wkbk==="result"){renderWkbkProgress();renderWkbkSheets();} else if(state.sub.wkbk==="words") renderWkbkWordSheets(); else renderWkbkTally(); }
+  if(v==="mt"){ if(state.sub.mt==="result"){renderProg();renderRunState();renderSheets();} else mtTally(); }
   if(v==="ps"){ if(state.sub.ps==="result"){renderProg();renderRunState();renderSheets();} else psTally(); }
   if(v==="basic"){ if(state.sub.basic==="result"){renderBasicProgress();renderBasicSheets();} else renderBasicTally(); }
   if(v==="exam"){ if(state.sub.exam==="result"){renderExamProgress();renderExamSheets();} else renderExamTally(); }
@@ -8855,6 +8968,12 @@ document.addEventListener("click",async e=>{
   if(t.closest("#exam-print")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"q"),`${exTitle()} 문제지`);return}
   if(t.closest("#exam-printkey")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"a"),`${exTitle()} 정답 및 해설`);return}
   if(t.closest("#exam-save")){try{await document.fonts.ready}catch(_){} saveDoc(`${exTitle()} ${state.exam.tab==="a"?"정답 및 해설":"문제지"}`,exPages(state.examResult,state.exam.tab));return}
+  if(t.closest("#mt-run")){mtRun();return}
+  if(t.closest("#mt-copy")){addRows("mt",filledRows("gen").map(r=>({...r})));return}
+  if(t.dataset.mtset){state.mtCur=Number(t.dataset.mtset);renderView();return}
+  if(t.closest("#mt-print-q")||t.closest("#mt-print-a")){const k=t.closest("#mt-print-a")?"a":"q"; try{await document.fonts.ready}catch(_){} printPages(buildMtPages(k,state.mtCur),`${state.set.title} ${state.mtCur}회 ${k==="a"?"해설지":"문제지"}`);return}
+  if(t.closest("#mt-print-all")||t.closest("#mt-print-alla")){const k=t.closest("#mt-print-alla")?"a":"q"; try{await document.fonts.ready}catch(_){} printPages(buildMtAll(k),`${state.set.title} 전체 ${k==="a"?"해설지":"문제지"}`);return}
+  if(t.closest("#mt-save-q")||t.closest("#mt-save-a")){const k=t.closest("#mt-save-a")?"a":"q"; try{await document.fonts.ready}catch(_){} saveDoc(`${state.set.title} ${state.mtCur}회 ${k==="a"?"해설지":"문제지"}`,buildMtPages(k,state.mtCur));return}
   if(t.closest("#ps-run")){psRun();return}
   if(t.closest("#ps-copy")){addRows("ps",filledRows("gen").map(r=>({...r})));return}
   if(t.closest("#ps-print-q")||t.closest("#ps-print-a")){const k=t.closest("#ps-print-a")?"a":"q"; try{await document.fonts.ready}catch(_){} printPages(buildPsPages(k),`${state.set.title||"지문별 시험지"} ${k==="a"?"해설지":"문제지"}`);return}
@@ -8927,6 +9046,8 @@ document.addEventListener("input",e=>{
   if(t.dataset.e2){state.exam[t.dataset.e2]=t.value;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500); const hp=$("#exam-headprev"); if(hp) hp.textContent=exHeadTitle(state.exam)||"(학교·시험 이름을 넣어 주세요)"; return}
   if(t.dataset.e2n){const v=Math.max(0,Math.min(20,parseInt(t.value,10)||0)); state.exam[t.dataset.e2n]=t.dataset.e2n==="maxPer"?Math.max(1,v):v; clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();return}
   if(t.dataset.exsc){const v=Math.max(1,Math.min(10,parseInt(t.value,10)||0)); if(v){state.exam.scores[t.dataset.exsc]=v;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();} return}
+  if(t.dataset.m2){state.mt[t.dataset.m2]=t.value;clearTimeout(draftT.mt);draftT.mt=setTimeout(()=>saveDraft("mt"),500);return}
+  if(t.dataset.mtn){const lim=t.dataset.mtn==="sets"?[1,10]:[5,45]; state.mt[t.dataset.mtn]=Math.min(lim[1],Math.max(lim[0],parseInt(t.value)||lim[0])); LS.set("bj-mt-opts",{sets:state.mt.sets,per:state.mt.per}); mtTally(); return}
   if(t.dataset.p2){state.ps[t.dataset.p2]=t.value;clearTimeout(draftT.ps);draftT.ps=setTimeout(()=>saveDraft("ps"),500);return}
   if(t.dataset.pstype){const set=new Set(state.ps.types); if(t.checked) set.add(t.dataset.pstype); else set.delete(t.dataset.pstype); state.ps.types=PS_ORDER.filter(x=>set.has(x)); LS.set("bj-ps-types",state.ps.types); psTally(); return}
   if(t.dataset.b2){state.basic[t.dataset.b2]=t.value;clearTimeout(draftT.basic);draftT.basic=setTimeout(()=>saveDraft("basic"),500);return}
