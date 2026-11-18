@@ -8505,7 +8505,7 @@ function viewGen(){
   if(state.sub.gen==="result") return `<div class="phead"><div><h1>변형문제 결과</h1></div><span class="spacer"></span>${tabs}</div>`+viewResult();
   const g=state.gen;
   return `<div class="gen">
-    <div class="gen-left"><p class="lead">${isMid()?"<b>중등 변형문제</b> · ":""}선택한 세트는 모든 지문에 동일하게 적용합니다.</p>${renderTypeCards()}<section class="card plan-card" id="plan">${planHTML()}</section></div>
+    <div class="gen-left"><p class="lead">${isMid()?"<b>중등 변형문제</b> · ":""}선택한 세트는 모든 지문에 동일하게 적용합니다. <button class="link" type="button" data-allone="1">모든 유형 1문항씩 담기</button></p>${renderTypeCards()}<section class="card plan-card" id="plan">${planHTML()}</section></div>
     <div class="gen-right">
       <section class="card"><h3>기본 정보</h3>
         <label class="field" style="margin-top:14px"><span>자료 제목</span><input data-g="title" value="${esc(g.title)}" placeholder="${isMid()?"예: 2026 중3 천재 영어 6과 변형문제":"예: 2026년 3월 고1 모의고사 변형"}"></label>
@@ -8662,6 +8662,7 @@ document.addEventListener("click",async e=>{
   // counters
   const inc=t.closest("[data-inc]"),dec=t.closest("[data-dec]");
   if(inc||dec){const k=(inc||dec).dataset[inc?"inc":"dec"];const v=Math.max(0,Math.min(5,(state.counts[k]||0)+(inc?1:-1)));if(v)state.counts[k]=v;else delete state.counts[k];persist();refreshCards();return}
+  if(t.closest("[data-allone]")){ const vt=TYPES.filter(visT); vt.forEach(x=>variantsOf(x).forEach(([l,v])=>delete state.counts[ckey(x.id,l,v)])); vt.forEach(x=>{ const [l,v]=variantsOf(x)[0]; state.counts[ckey(x.id,l,v)]=1; }); persist(); refreshCards(); toast(`모든 유형을 1문항씩 담았습니다. 지문마다 ${vt.length}문항이 나옵니다.`); return }
   const rs=t.closest("[data-reset]"); if(rs){TYPES.filter(x=>visT(x)&&x.cat===rs.dataset.reset).forEach(x=>variantsOf(x).forEach(([l,v])=>delete state.counts[ckey(x.id,l,v)]));persist();refreshCards();return}
   const fl=t.closest("[data-fillcat]"); if(fl){TYPES.filter(x=>visT(x)&&x.cat===fl.dataset.fillcat).forEach(x=>variantsOf(x).forEach(([l,v])=>{const k=ckey(x.id,l,v);state.counts[k]=Math.min(5,(state.counts[k]||0)+1)}));persist();refreshCards();return}
   const fd=t.closest("[data-fold]"); if(fd){state.folded[fd.dataset.fold]=!state.folded[fd.dataset.fold];persist();refreshCards();return}
@@ -8807,7 +8808,7 @@ document.addEventListener("click",async e=>{
   if(t.closest("#imp-save")){commitImport();return}
   if(t.closest("#imp-cancel")){state.imp={...state.imp,passages:null,msg:""};renderView();return}
 });
-function refreshCards(){const el=document.querySelector(".gen-left"); if(el){const st=el.scrollTop; el.innerHTML=`<p class="lead">${isMid()?"<b>중등 변형문제</b> · ":""}선택한 세트는 모든 지문에 동일하게 적용합니다.</p>`+renderTypeCards()+`<section class="card plan-card" id="plan">${planHTML()}</section>`; el.scrollTop=st;} renderTally();}
+function refreshCards(){const el=document.querySelector(".gen-left"); if(el){const st=el.scrollTop; el.innerHTML=`<p class="lead">${isMid()?"<b>중등 변형문제</b> · ":""}선택한 세트는 모든 지문에 동일하게 적용합니다. <button class="link" type="button" data-allone="1">모든 유형 1문항씩 담기</button></p>`+renderTypeCards()+`<section class="card plan-card" id="plan">${planHTML()}</section>`; el.scrollTop=st;} renderTally();}
 let draftT={};
 document.addEventListener("input",e=>{
   const t=e.target;
