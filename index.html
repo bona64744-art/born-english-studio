@@ -525,6 +525,7 @@ body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var
 .rf-o{display:flex;gap:2mm;align-items:flex-start;padding:1.5mm 0;border-bottom:.2mm dotted #bbb;font-size:9.6pt;line-height:1.5}
 .rf-n{flex:none;width:6mm;font-weight:700;color:#1E4BD2}.rf-t{flex:1}.rf-t small{color:#1E4BD2;font-weight:700;margin-right:1mm}.rf-t small.tg{display:inline-block;font-size:7.4pt;font-weight:600;border:.25mm solid #9db0ec;border-radius:3mm;padding:0 1.6mm;margin-right:1.8mm;background:#f5f7ff;vertical-align:1px}.rf-t .why{display:block;font-size:8.2pt;color:#a33;margin-top:.6mm;font-weight:400}
 .rf-b{flex:none;font-size:8.4pt;color:#555;white-space:nowrap}
+.rf-bg dt em{font-style:normal;font-weight:500;font-size:.85em;color:#b45309}
 .rf-bg{margin:2mm 0}.rf-bg dl{margin:0}.rf-bg dt{font-weight:700;font-size:9pt;color:#1E4BD2;margin-top:1.6mm}.rf-bg dd{margin:.4mm 0 0;font-size:9.4pt;line-height:1.55}
 .page.rf.u1 .rf-o{font-size:10.4pt;padding:1.8mm 0;line-height:1.58}.page.rf.u1 .rf-bg dd{font-size:10.2pt;line-height:1.6}.page.rf.u1 .rf-pass{font-size:8.8pt}.page.rf.u1 .rf-i{font-size:10pt}
 .page.rf.u2 .rf-o{font-size:11.2pt;padding:2.4mm 0;line-height:1.62}.page.rf.u2 .rf-bg dd{font-size:10.8pt;line-height:1.64}.page.rf.u2 .rf-pass{font-size:9.4pt}.page.rf.u2 .rf-i{font-size:10.6pt}.page.rf.u2 .rf-bg dt{margin-top:2.4mm}
@@ -3363,8 +3364,11 @@ function rfPrompt(p){
 ${passageHeader(p)}
 [만들 것]
 1. gist — 이 글을 한마디로 정리한 한글 한두 문장(80자 이내). 글쓴이가 무엇을 말하려는 글인지가 드러나야 합니다.
-2. bg — 이 글의 배경과 의도를 자세히 풀어 쓴 한글 설명 3가지(각 2~3문장, 70~170자). 학생이 "이 사람이 왜 이런 글을 썼고 나에게 무엇을 바라는지"를 알아야 글이 이해되기 때문입니다.
+2. bg — 이 글의 배경·출처·의도를 풀어 쓴 한글 설명 5가지(각 2~3문장, 70~170자). 학생이 "이 사람이 왜 이런 글을 썼고 나에게 무엇을 바라는지"를 알아야 글이 이해되기 때문입니다.
  - background: 이 글의 '출처와 뿌리'를 설명합니다. ① 이 글이 어떤 종류의 글에서 나왔는지(책의 어느 분야, 신문·잡지 칼럼, 학술 연구 소개, 안내문, 이야기 등)와 ② 어떤 학문·이론·사회 현상·역사적 사건·이야기에서 파생된 내용인지(예: '도덕적 면허 효과'라는 심리학 연구, 자본주의와 환경 문제를 다루는 사회학 논의)를 풀어 줍니다. 학생이 모를 만한 핵심 개념의 정체도 함께 알려 줍니다. 출처의 책 제목·저자·연도·기관·수치는 확실히 아는 널리 알려진 경우가 아니면 절대 지어내지 말고, 확실하지 않으면 '~분야의 글로 보인다', '~에 관한 논의에서 나온 내용이다'처럼 갈래와 분야까지만 씁니다.
+ - source: 이 지문의 원전(출처)이 무엇인지 씁니다. 확실히 아는 경우에만 책·논문·기사의 제목, 저자, 발행 연도를 적고, 확실하지 않으면 절대 지어내지 말고 "정확한 출처는 확인되지 않음 — ~분야의 책·논문·칼럼에서 나온 글로 보인다"처럼 갈래와 분야까지만 씁니다(1~2문장).
+ - src_sure: source에 적은 제목·저자가 확실하면 true, 갈래·분야만 추정이면 false.
+ - aim: 그 원전(책·논문·칼럼 전체)이 독자에게 알리려는 바와 이 지문이 그 안에서 맡은 역할을 설명합니다(2~3문장). 원전을 확실히 모르면 이 지문이 속한 주제의 논의가 대체로 무엇을 알리려 하는지를 쓰되 '~로 보인다'처럼 단정하지 않습니다.
  - why: 필자가 왜 이 글을 썼는지(문제 제기, 안내, 설득, 경험 공유, 정보 전달 등 쓴 동기)를 지문 근거로 설명합니다.
  - want: 필자가 독자에게 결국 무엇을 원하는지(알아 두길, 행동하길, 생각을 바꾸길, 공감하길 등)와 이 글이 말하려는 최종 메시지를 설명합니다.
  - 중요한 낱말은 한글 뒤 괄호에 영어(지문에 나온 그대로)를 붙입니다.
@@ -3374,7 +3378,7 @@ ${passageHeader(p)}
 4. 영어 낱말: 설명하다가 중요한 낱말·표현은 한글 바로 뒤 괄호 안에 영어를 지문에 나온 그대로 적습니다. 포인트마다 1~3개. 예) 학교 축제(festival)가 10월 14일에 열린다. 괄호 속 영어는 반드시 지문에 있는 낱말(필요하면 원형)이어야 합니다. 영어 문장을 통째로 옮기지 않습니다. 어려운 구문·접속어(because, instead, however 등)가 논리의 열쇠라면 그 영어를 괄호에 넣고 우리말로 무슨 역할을 하는지 풀어 줍니다.
 5. points를 이어 읽으면 지문 전체가 완벽히 이해되어야 합니다. 같은 내용을 반복하지 말고, 같은 내용을 억지로 늘리지 않습니다. 지문이 길면 한 포인트에 여러 문장의 핵심을 묶습니다.
 [규칙] 지문에 없는 사실·수치·의견을 지어내지 않습니다. 중학교 2학년이 이해하는 쉬운 우리말로, 선생님이 옆에서 설명해 주는 말투(~해요 대신 ~한다 체)로 씁니다.
-[출력] 설명 없이 JSON 하나만: {"title_ko":"지문을 한 줄로 요약한 한글 제목","gist":"한마디 정리","bg":{"background":"…","why":"…","want":"…"},"points":[{"tag":"배경","t":"한글 설명(영어 낱말)"}]}`;
+[출력] 설명 없이 JSON 하나만: {"title_ko":"지문을 한 줄로 요약한 한글 제목","gist":"한마디 정리","bg":{"background":"…","source":"…","src_sure":false,"aim":"…","why":"…","want":"…"},"points":[{"tag":"배경","t":"한글 설명(영어 낱말)"}]}`;
 }
 function rfNorm(r,text){
   if(!r||typeof r!=="object"||!Array.isArray(r.points)) return null;
@@ -3387,7 +3391,8 @@ function rfNorm(r,text){
   if(pts.length<12) return null;
   const gist=String(r.gist||"").replace(/\s+/g," ").trim().slice(0,140); if(!ko(gist)) return null;
   const g=r.bg&&typeof r.bg==="object"?r.bg:{}, bg={};
-  for(const k of ["background","why","want"]){ const v=fixParen(String(g[k]||"").replace(/\s+/g," ").trim()).slice(0,300); if(v.length<30||!ko(v)) return null; bg[k]=v; }
+  for(const k of ["background","source","aim","why","want"]){ const v=fixParen(String(g[k]||"").replace(/\s+/g," ").trim()).slice(0,300); if(v.length<20||!ko(v)) return null; bg[k]=v; }
+  bg.sure=g.src_sure===true;
   return {title_ko:String(r.title_ko||"").replace(/\s+/g," ").trim().slice(0,60),gist,bg,points:pts.slice(0,20)};
 }
 function rfTally(){
@@ -3409,7 +3414,7 @@ function viewRf(){
   return head+`<div class="gen-right" style="max-width:1100px">
     <section class="card"><h3>기본 정보</h3>
       <label class="field" style="margin-top:14px"><span>머리말 <small>불러온 시험 이름으로 자동 입력 · 직접 고쳐도 됩니다</small></span><input data-r2="kicker" value="${esc(b.kicker)}" placeholder="예: 2026년 9월 고2 모의고사"></label>
-      <p class="hint" style="margin-top:12px">지문마다 A4 한 쪽을 빈 곳 없이 채우도록 글자 크기를 자동으로 맞춥니다(포인트는 지문마다 12~20개). 앞부분에 한 줄 핵심과 글의 배경 지식·쓴 이유·원하는 바가 나오고, 이어서 글이 흐르는 순서대로 이해 포인트가 나옵니다. 하위권 학생이 읽는 자료입니다.</p>
+      <p class="hint" style="margin-top:12px">지문마다 A4 한 쪽을 빈 곳 없이 채우도록 글자 크기를 자동으로 맞춥니다(포인트는 지문마다 12~20개). 앞부분에 한 줄 핵심과 글의 배경 지식·출처·원전이 알리려는 바·쓴 이유·원하는 바가 나오고, 이어서 글이 흐르는 순서대로 이해 포인트가 나옵니다. 하위권 학생이 읽는 자료입니다.</p>
       <div class="savedat" data-saved="rf">${b.savedAt?`마지막 임시 저장: ${fmtTime(b.savedAt)}`:"입력한 내용은 자동으로 임시 저장됩니다."}</div></section>
     <section class="card"><h3>영어 지문 <small data-count="rf">${tableCount("rf")}</small></h3>
       ${dropZone("rf")}
@@ -3450,7 +3455,7 @@ function buildRfPages(kind){
     const nm=`${d.no}${/^\d/.test(d.no)?"번":""}`;
     const mk=lv=>{
       const blocks=[{br:true,cat:nm,html:`<div class="rf-h"><b>${esc(nm)}</b><span>${esc(d.src||res.kicker||"")}${d.title_ko?` · ${esc(d.title_ko)}`:""}</span></div><div class="rf-i"><b>이 글을 한마디로</b><br>${esc(d.gist)}</div>`},
-        {cat:nm,html:`<div class="rf-bg"><div class="rf-sl">이 글의 배경과 의도</div><dl><dt>배경 지식 · 출처와 뿌리</dt><dd>${esc(d.bg.background)}</dd><dt>왜 이 글을 썼나</dt><dd>${esc(d.bg.why)}</dd><dt>무엇을 원하나</dt><dd>${esc(d.bg.want)}</dd></dl></div>`}];
+        {cat:nm,html:`<div class="rf-bg"><div class="rf-sl">이 글의 배경과 의도</div><dl><dt>배경 지식 · 어디서 파생된 내용인가</dt><dd>${esc(d.bg.background)}</dd><dt>출처${d.bg.sure?"":" <em>(AI 추정 · 확인 필요)</em>"}</dt><dd>${esc(d.bg.source)}</dd><dt>원전이 알리려는 바</dt><dd>${esc(d.bg.aim)}</dd><dt>왜 이 글을 썼나</dt><dd>${esc(d.bg.why)}</dd><dt>무엇을 원하나</dt><dd>${esc(d.bg.want)}</dd></dl></div>`}];
       if(state.rf.showPass&&lv<3) blocks.push({cat:nm,html:`<div class="rf-pass">${inline(d.text)}</div>`});
       blocks.push({cat:nm,html:`<div class="rf-sl" style="margin-top:2mm">이 글을 이해하는 핵심 포인트</div>`});
       d.points.forEach((o,i)=>blocks.push({cat:nm,html:`<div class="rf-o"><span class="rf-n">${i+1}</span><span class="rf-t"><small class="tg">${esc(o.tag)}</small>${esc(o.t)}</span></div>`}));
