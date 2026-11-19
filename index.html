@@ -532,6 +532,22 @@ body{background:radial-gradient(1100px 380px at 85% -120px,color-mix(in srgb,var
 .page.rf.t1 .rf-o{font-size:8.8pt;padding:1mm 0;line-height:1.42}.page.rf.t1 .rf-bg dd{font-size:8.8pt;line-height:1.45}.page.rf.t1 .rf-pass{font-size:7.6pt;line-height:1.42}
 .page.rf.t2 .rf-o{font-size:8.2pt;padding:.7mm 0;line-height:1.38}.page.rf.t2 .rf-bg dd{font-size:8.2pt;line-height:1.4}.page.rf.t2 .rf-pass{font-size:7pt;line-height:1.35}.page.rf.t2 .rf-i{font-size:8.4pt}
 .page.rf.t3 .rf-o{font-size:8pt;padding:.6mm 0;line-height:1.35}.page.rf.t3 .rf-bg dd{font-size:8pt;line-height:1.38}
+.page.ta{font-size:8.6pt}
+.ta-h{display:flex;align-items:baseline;gap:2.4mm;margin-bottom:1.6mm}.ta-h b{font-size:15pt;color:#1E4BD2}.ta-h span{font-size:8.8pt;color:#555}
+.ta-box{border:.3mm solid #c9d4f6;background:#f5f7ff;border-radius:1.2mm;padding:2mm 2.6mm;font-size:8.8pt;line-height:1.5}.ta-box b{color:#1E4BD2;margin-right:1mm}.ta-map{margin-top:1mm;font-weight:600}
+.ta-t{font-weight:700;font-size:9.6pt;color:#1E4BD2;margin:3mm 0 1.2mm;border-bottom:.3mm solid #c9d4f6;padding-bottom:.6mm}.ta-t.big{font-size:11.4pt;color:#111;border-bottom:.5mm solid #1E4BD2;margin-top:4mm}
+.ta-p{margin:0 0 1.4mm;line-height:1.55;font-size:8.8pt}.ta-note{font-size:7.8pt;color:#666;margin-bottom:1mm}
+.ta-st,.ta-pt{display:flex;gap:2mm;font-size:8.6pt;line-height:1.5;margin-bottom:1.4mm}.ta-pt{display:block}
+.ta-n{flex:none;width:5mm;height:5mm;border-radius:50%;background:#1E4BD2;color:#fff;font-size:7.4pt;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.ta-st em,.ta-pt em,.ta-sig em{font-style:normal;color:#888;font-size:7.8pt}.ta-sg{color:#b45309;font-size:8pt}
+.ta-sig{font-size:8.4pt;line-height:1.45}.ta-sig div{padding:.5mm 0;border-bottom:.2mm dotted #ccc}.ta-sig b{color:#1E4BD2}
+.ta-s{border:.3mm solid #cfd6ea;border-radius:1.4mm;padding:1.8mm 2.4mm;margin-bottom:1.6mm}
+.ta-sh{display:flex;align-items:center;gap:1.6mm;margin-bottom:1mm;flex-wrap:wrap}.ta-sh>b{background:#1E4BD2;color:#fff;border-radius:1mm;min-width:5.4mm;text-align:center;font-size:8.6pt;padding:0 1mm}
+.ta-role{font-size:7.8pt;font-weight:700;border:.25mm solid #9db0ec;border-radius:3mm;padding:0 1.6mm;background:#f5f7ff}.ta-rel{font-size:7.8pt;color:#b45309;font-weight:600}
+.ta-en{font-size:8.8pt;line-height:1.55;font-weight:600}.ta-en .sl{color:#1E4BD2;font-style:normal;font-weight:700}.ta-ko{font-size:8.6pt;color:#333;margin:.8mm 0 1mm}
+.ta-s dl{margin:0;display:grid;grid-template-columns:8mm 1fr;gap:.6mm 1.2mm;font-size:8.2pt;line-height:1.5}.ta-s dt{font-weight:700;color:#1E4BD2}.ta-s dd{margin:0}.ta-dev{font-weight:700;color:#b45309}
+.ta-v{display:flex;flex-wrap:wrap;gap:1mm 2mm;margin-top:1mm;font-size:7.8pt}.ta-v span{background:#f2f2f2;border-radius:1mm;padding:0 1.4mm}.ta-v b{color:#1E4BD2}
+.ta-ol{margin:0 0 1.4mm;padding-left:4.6mm;font-size:8.6pt;line-height:1.5}.ta-ol li{margin-bottom:.8mm}
 .rf-seq,.rf-ans{margin-top:2.5mm}.rf-sl{font-weight:700;font-size:9.4pt;margin-bottom:1.6mm}
 .rf-boxes{display:flex;flex-wrap:wrap;align-items:center;gap:1.2mm}.rf-boxes em{font-style:normal;color:#888;font-size:9pt}
 .rf-box{display:inline-flex;width:9mm;height:9mm;border:.35mm solid #333;border-radius:1mm;align-items:flex-start;justify-content:flex-start;font-size:10pt;font-weight:700}
@@ -1646,7 +1662,7 @@ const LS = {
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){return} try{syncTouch(k)}catch(e){}}
 };
 /* ---------------- 기기 간 동기화: 초안·진행 중 작업·설정을 서버(db)에도 저장해 다른 컴퓨터에서 이어서 쓴다 ---------------- */
-const SYNC_KEYS=new Set(["bj-rf-draft","bj-mt-draft","bj-mt-opts","bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
+const SYNC_KEYS=new Set(["bj-ta-draft","bj-rf-draft","bj-mt-draft","bj-mt-opts","bj-ps-draft","bj-ps-types","bj-gen-draft","bj-gen-draft-mid","bj-ana-draft","bj-cls-draft","bj-wkbk-draft","bj-basic-draft",
   "bj-wkbk-last","bj-cls-last","bj-ana-last","bj-basic-last","bj-exam-draft","bj-exam-last","bj-hs-draft","bj-hs-last","bj-cr-draft","bj-cr-last","bj-tb-draft","bj-tb-last","bj-ext","bj-ext-mid","jp-set","bj-bookgrammar","bj-cls-wb","bj-wkbk-acts","bj-settings","bj-att","bj-lg"]);
 const SYNC_TS_KEY="bj-sync-ts"; const _syncT={};
 function syncTs(){ try{return JSON.parse(localStorage.getItem(SYNC_TS_KEY)||"{}")||{}}catch(e){return {}} }
@@ -1707,7 +1723,7 @@ const anaDraft = LS.get("bj-ana-draft",null);
 const state = {
   view: saved.view || "gen",
   level: saved.level==="mid"?"mid":"high",
-  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new", mt:"new", rf:"new"},
+  sub: {gen:"new", ana:"new", cls:"new", wkbk:"new", basic:"new", ps:"new", mt:"new", rf:"new", ta:"new"},
   genSel: new Set(),
   counts: saved.counts || {...DEFAULT_COUNTS,...MID_DEFAULT},
   folded: saved.folded || {},
@@ -1798,7 +1814,7 @@ function renderTable(key){
 }
 function tableCount(key){const n=filledRows(key).length;return `${n}/${rowsOf(key).length}개 입력 · 최대 30개`}
 /* 머리말 자동 입력: 불러온 지문의 시험 이름으로 채우되, 직접 고친 값은 건드리지 않습니다 */
-const KICK_SEL={rf:"data-r2",mt:"data-m2",ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
+const KICK_SEL={ta:"data-t2",rf:"data-r2",mt:"data-m2",ps:"data-p2",ana:"data-a",cls:"data-c",wkbk:"data-k2",basic:"data-b2",hs:"data-h2",cr:"data-c2"};
 function autoKick(key){
   const st=state[key]; if(!st||!st.rows||!KICK_SEL[key]) return;
   const el=document.querySelector(`[${KICK_SEL[key]}="kicker"]`); if(el&&document.activeElement===el) return;
@@ -1814,10 +1830,10 @@ function saveDraft(key){
   if(key==="hs"){ hsSaveDraft(); return; }
   if(key==="cr"){ crSaveDraft(); return; }
   state[key].savedAt=Date.now();
-  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft",mt:"bj-mt-draft",rf:"bj-rf-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
+  LS.set({gen:genKey(),ana:"bj-ana-draft",cls:"bj-cls-draft",wkbk:"bj-wkbk-draft",basic:"bj-basic-draft",ps:"bj-ps-draft",mt:"bj-mt-draft",rf:"bj-rf-draft",ta:"bj-ta-draft"}[key],{kicker:state[key].kicker,title:state[key].title,src:state[key].src,rows:state[key].rows,savedAt:state[key].savedAt});
   const el=document.querySelector(`[data-saved="${key}"]`); if(el) el.textContent=`마지막 임시 저장: ${fmtTime(state[key].savedAt)}`;
   const c=document.querySelector(`[data-count="${key}"]`); if(c) c.textContent=tableCount(key);
-  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally(); else if(key==="mt") mtTally(); else if(key==="rf") rfTally();
+  if(key==="gen") renderTally(); else if(key==="cls") renderClsTally(); else if(key==="wkbk") renderWkbkTally(); else if(key==="basic") renderBasicTally(); else if(key==="ps") psTally(); else if(key==="mt") mtTally(); else if(key==="rf") rfTally(); else if(key==="ta") taTally();
 }
 function addRows(key,items){
   const rows=rowsOf(key);
@@ -3355,6 +3371,170 @@ async function createDraftMaterial(total){
 
 
 
+
+/* ================= 교사용 정밀 분석 (논리·의미·형태 · 문장 연결 · 논리 패턴) ================= */
+const TA_REL=["주제 제시","주장","근거","이유","결과","예시","부연","재진술","대조","양보","반전","전환","문제 제기","해결 제시","조건","정의","비교","열거","강조","요약","결론","인용","질문","답"];
+state.ta=(()=>{ const d=LS.get("bj-ta-draft",null); return {kicker:(d&&d.kicker)||"", rows:(d&&d.rows)||[emptyRow()], savedAt:(d&&d.savedAt)||null, run:{running:false,ctl:null}}; })();
+state.taResult=null;
+function taNumbered(sents,from,to){ return sents.map((x,i)=>`${i+1}. ${x}`).join("\n"); }
+function taBatchPrompt(p,sents,a,b){
+  const list=sents.map((x,i)=>`${i+1}. ${x}`).join("\n");
+  return `당신은 영어 지문을 수업 전에 정밀하게 분석하는 최고 수준의 영어 교사이자 독해 논리 전문가입니다. 아래 지문의 문장 ${a}~${b}번을 분석해 선생님 자신의 수업 준비용 분석서를 만듭니다. 학생에게 보여 주는 자료가 아니므로 전문 용어를 써도 되지만, 설명은 구체적이어야 합니다.
+${passageHeader(p)}
+
+[번호가 붙은 전체 문장]
+${list}
+
+[분석 대상] ${a}번부터 ${b}번 문장(${b-a+1}개). 맥락 이해를 위해 전체 문장을 참고하되 대상 문장만 출력합니다.
+[문장마다 쓸 것] 모두 한글로, 구체적으로 씁니다. 빈말·일반론('중요한 내용이다') 금지.
+- no: 문장 번호.
+- ko: 자연스러운 우리말 해석(의역이되 구조가 드러나게).
+- chunk: 영어 원문 그대로에 끊어 읽기 표시(' / ')를 넣은 것. 원문 단어를 바꾸거나 빼지 않습니다.
+- role: 이 문장이 글 전체에서 하는 담화 기능 한 마디(예: 주제 제시, 주장, 근거, 사례, 양보, 반전, 결론 등).
+- rel: {"to": 연결되는 앞 문장 번호(첫 문장은 0), "type": 관계 라벨(${TA_REL.join(", ")} 중 가장 알맞은 것 하나), "device": 연결 장치(명시적 연결어 / 지시어·대명사 / 반복·바꿔 쓰기 / 병렬 구조 / 의미장 연쇄 / 연결어 없는 암묵적 연결 중에서 고르고 실제 단어를 함께 적기. 예: 연결어 'However'), "why": 앞 문장과 정확히 어떻게 이어지는지 1~2문장. 연결어가 없으면 무엇으로 관계를 알 수 있는지 설명}.
+- logic: 논리 분석 2~3문장. 이 문장의 논리적 역할, 앞뒤 문장과의 추론 관계(앞 문장의 무엇을 받아 무엇으로 넘기는지), 전체 논리 흐름에서의 위치.
+- meaning: 의미 분석 2~3문장. 핵심 어구의 문맥상 의미, 함축·숨은 뜻, 지시어가 가리키는 대상, 비유·강조의 효과.
+- form: 형태 분석 2~3문장. 문장 구조(주어·동사·절의 층위), 핵심 문법(관계사·분사구문·도치·가정법·병렬 등)이 어디에 걸리는지, 해석할 때 흔히 틀리는 지점, 출제 가능한 어법 포인트.
+- vocab: 문맥상 중요한 어휘·숙어 1~4개 [{"w":"영어","m":"문맥 뜻"}].
+[출력] 설명 없이 JSON 하나만: {"items":[{"no":${a},"ko":"","chunk":"","role":"","rel":{"to":0,"type":"","device":"","why":""},"logic":"","meaning":"","form":"","vocab":[{"w":"","m":""}]}]}`;
+}
+function taOverviewPrompt(p,sents){
+  const list=sents.map((x,i)=>`${i+1}. ${x}`).join("\n");
+  return `당신은 영어 지문을 수업 전에 정밀하게 분석하는 최고 수준의 영어 교사이자 독해 논리 전문가입니다. 아래 지문 전체의 논리 구조와 논리 패턴을 선생님 수업 준비용으로 상세히 분석하세요. 모두 한글로 구체적으로 씁니다(영어 용어·핵심어는 괄호에 병기). 일반론 금지, 이 지문의 실제 문장 번호와 신호어를 근거로 씁니다.
+${passageHeader(p)}
+
+[번호가 붙은 전체 문장]
+${list}
+
+[출력 항목]
+- title_ko: 지문 한 줄 제목, topic: 주제 한 줄, gist: 요지 2문장, logic_map: 논리 흐름을 화살표로 요약한 한 줄(예: [주제 제시] → [양보] → [반전·주장] → [근거] → [결론]).
+- pattern: {"name": 이 지문의 전체 논리 패턴 이름(예: 양보-반전형 주장, 문제-해결형, 대조형, 인과 사슬형, 일반-구체형, 열거형, 비교형, 가설-검증형 등), "def": 그 패턴이 무엇이고 이 지문에서 어떻게 구현되는지 4~6문장, "why_works": 이 패턴 때문에 독자가 어떤 오해를 하기 쉬운지 또는 어디에 정답 단서가 있는지 2~3문장}
+- stages: 지문을 논리 단계로 나눈 배열 5~9개 [{"label":"단계명","sents":"문장 번호 범위(예 1-2)","func":"그 단계의 기능, 앞 단계에서 어떻게 넘어오는지, 왜 필요한지 2문장"}]
+- patterns: 지문에 나타난 구체적 논리 패턴(하위 패턴 포함) 3~7개 [{"name":"패턴명(예: 양보-반전, 원인-결과, 일반-구체, 대조, 열거, 재진술, 문제-해결, 비교 등)","sents":"관련 문장 번호","signal":"그 패턴을 알려 주는 신호어·표지(실제 단어)","detail":"이 패턴이 이 지문에서 어떻게 작동하는지 2~3문장"}]
+- signals: 지문의 주요 신호어·연결 표현 목록 [{"w":"실제 영어 표현","at":문장 번호,"fn":"그 표현이 만드는 논리 관계와 효과 한 줄"}] (없으면 비워도 되나, 있는 것은 빠짐없이)
+- cohesion: 지시어·대명사·반복·바꿔 쓰기·병렬 구조 등 응집 장치가 지문 전체에서 어떻게 문장들을 묶는지 3~5문장(문장 번호 근거)
+- pitfalls: 학생이 이 지문에서 흔히 하는 논리·의미 오해와 그 이유 3~4문장
+- teach: {"order":["수업에서 설명하는 추천 순서 3~6단계 각각 한 문장"],"hard":["학생이 어려워할 지점과 설명 팁 3~5개(문장 번호 포함)"],"quiz":["변형문제 출제 포인트 4~7개(빈칸 후보 문장·어법 포인트·순서/삽입 단서·함정 선지 설계 등 문장 번호 포함)"]}
+[규칙] 지문에 없는 사실을 지어내지 않습니다. 문장 번호는 위 번호를 그대로 씁니다.
+[출력] 설명 없이 JSON 하나만.`;
+}
+function taNormBatch(r,a,b){
+  if(!r||!Array.isArray(r.items)) return null;
+  const ko=t=>/[가-힣]/.test(t), str=v=>String(v==null?"":v).replace(/\s+/g," ").trim(), out=[];
+  for(let n=a;n<=b;n++){
+    const o=r.items.find(x=>x&&Number(x.no)===n); if(!o) return null;
+    const rel=o.rel||{}; const it={no:n,ko:str(o.ko),chunk:str(o.chunk),role:str(o.role).slice(0,20),
+      rel:{to:Number(rel.to)||0,type:str(rel.type).slice(0,12),device:str(rel.device).slice(0,80),why:str(rel.why)},
+      logic:str(o.logic),meaning:str(o.meaning),form:str(o.form),
+      vocab:(Array.isArray(o.vocab)?o.vocab:[]).map(v=>({w:str(v&&v.w).slice(0,40),m:str(v&&v.m).slice(0,60)})).filter(v=>v.w&&v.m).slice(0,4)};
+    if(it.ko.length<5||!ko(it.logic)||it.logic.length<30||!ko(it.meaning)||it.meaning.length<25||!ko(it.form)||it.form.length<25||!it.rel.type||it.rel.why.length<12) return null;
+    out.push(it);
+  }
+  return out;
+}
+function taNormOverview(r){
+  if(!r||typeof r!=="object") return null;
+  const str=v=>String(v==null?"":v).replace(/\s+/g," ").trim(), arr=v=>Array.isArray(v)?v:[];
+  const pt=r.pattern||{}; const o={title_ko:str(r.title_ko).slice(0,60),topic:str(r.topic),gist:str(r.gist),logic_map:str(r.logic_map),
+    pattern:{name:str(pt.name),def:str(pt.def),why_works:str(pt.why_works)},
+    stages:arr(r.stages).map(x=>({label:str(x&&x.label),sents:str(x&&x.sents),func:str(x&&x.func)})).filter(x=>x.label&&x.func),
+    patterns:arr(r.patterns).map(x=>({name:str(x&&x.name),sents:str(x&&x.sents),signal:str(x&&x.signal),detail:str(x&&x.detail)})).filter(x=>x.name&&x.detail),
+    signals:arr(r.signals).map(x=>({w:str(x&&x.w),at:str(x&&x.at),fn:str(x&&x.fn)})).filter(x=>x.w&&x.fn).slice(0,24),
+    cohesion:str(r.cohesion),pitfalls:str(r.pitfalls),
+    teach:{order:arr(r.teach&&r.teach.order).map(str).filter(Boolean),hard:arr(r.teach&&r.teach.hard).map(str).filter(Boolean),quiz:arr(r.teach&&r.teach.quiz).map(str).filter(Boolean)}};
+  if(!/[가-힣]/.test(o.gist)||o.pattern.name.length<2||o.pattern.def.length<40||o.stages.length<3||o.patterns.length<2||o.teach.quiz.length<2||o.cohesion.length<30) return null;
+  return o;
+}
+function taTally(){
+  const el=$("#ta-tally"); const rows=filledRows("ta");
+  const n=rows.reduce((a,r)=>a+splitSentences(tidyBreaks(r.text)).length,0);
+  if(el) el.innerHTML=`지문 <b>${rows.length}</b>개 · 문장 약 <b>${n}</b>개<br><small>${rows.length?`문장마다 연결·논리·의미·형태를 분석하므로 지문당 1~3분 걸립니다`:"지문을 넣어 주세요"}</small>`;
+  const b=$("#ta-run"); if(b) b.disabled=!rows.length||state.ta.run.running||(sampleChecked&&!sample);
+}
+function taProg(){
+  const el=$("#ta-prog"); if(!el||!state.taResult) return; const r=state.ta.run, docs=state.taResult.docs;
+  const bad=docs.filter(d=>d.status==="error").length;
+  el.innerHTML=r.running?`분석 중입니다. ${docs.filter(d=>d.status==="done"||d.status==="error").length}/${docs.length}개 지문 <button class="link danger" type="button" id="ta-stop">중지</button>`:(bad?`${bad}개 지문은 만들지 못했습니다. <button class="link" type="button" id="ta-retry">다시 만들기</button>`:"");
+}
+function viewTa(){
+  const head=`<div class="phead"><div><h1>교사용 정밀 분석</h1><p>수업 전에 선생님이 보는 자료입니다. 문장마다 앞 문장과의 연결, 논리·의미·형태 분석을 붙이고, 지문 전체의 논리 패턴과 출제 포인트, 수업 설명 순서까지 정리합니다.</p></div><span class="spacer"></span>${subTabs("ta",[["new","새로 만들기"],["result","결과"]])}</div>`;
+  if(state.sub.ta==="result") return head+`<div class="rbar"><span class="spacer"></span><button class="btn" type="button" id="ta-print">인쇄</button>${downloads?`<button class="btn" type="button" id="ta-save">저장</button>`:""}</div><div class="rinfo" id="ta-prog"></div><div class="sheets" id="ta-sheets"></div>`;
+  const b=state.ta;
+  return head+`<div class="gen-right" style="max-width:1100px">
+    <section class="card"><h3>기본 정보</h3>
+      <label class="field" style="margin-top:14px"><span>머리말 <small>불러온 시험 이름으로 자동 입력 · 직접 고쳐도 됩니다</small></span><input data-t2="kicker" value="${esc(b.kicker)}" placeholder="예: 2026년 9월 고2 모의고사"></label>
+      <p class="hint" style="margin-top:12px">지문마다 여러 쪽의 분석서가 만들어집니다(문장 수에 따라 3~6쪽). 앞부분은 지문 전체의 논리 패턴·단계·신호어·응집 장치, 이어서 문장별 정밀 분석, 마지막은 수업 순서와 출제 포인트입니다. 선생님 전용이라 학생용 인쇄물에는 쓰지 마세요.</p>
+      <div class="savedat" data-saved="ta">${b.savedAt?`마지막 임시 저장: ${fmtTime(b.savedAt)}`:"입력한 내용은 자동으로 임시 저장됩니다."}</div></section>
+    <section class="card"><h3>영어 지문 <small data-count="ta">${tableCount("ta")}</small></h3>
+      ${dropZone("ta")}
+      ${renderTable("ta")}
+      <div class="tablebar"><button class="btn" type="button" data-addrow="ta">+ 지문 추가</button><button class="btn" type="button" data-import="ta">모의고사 지문 불러오기</button><button class="btn" type="button" id="ta-copy">변형문제 지문 가져오기</button></div></section>
+    <div class="runbar"><div class="tally" id="ta-tally"></div><span class="spacer"></span><button class="btn primary big" type="button" id="ta-run">정밀 분석서 만들기</button></div>
+  </div>`;
+}
+async function taCall(prompt,run,check){
+  for(let a=0;a<3&&!run.ctl.signal.aborted;a++){
+    let r=null; try{ r=await sample.json(prompt,{modelTier:state.tier==="quick"?"default":state.tier,signal:run.ctl.signal,cache:false}); }catch(e){ if(e&&e.code==="cancelled") throw e; if(e&&["not_granted","rate_limited","sampling_disabled","session_expired"].includes(e.code)){ toast(errCopy(e)); run.ctl.abort(); return null; } r=null; }
+    const n=check(r); if(n) return n;
+  }
+  return null;
+}
+async function taGen(d,run){
+  const p={exam:d.src||"지문",no:d.no,grade:/고[123]/.exec(d.src||"")?.[0]||"",text:d.text};
+  d.status="work"; d.sents=splitSentences(d.text); const S=d.sents, B=5, jobs=[];
+  for(let a=1;a<=S.length;a+=B){ const b=Math.min(S.length,a+B-1); jobs.push({a,b}); }
+  const [ov,...bs]=await Promise.all([taCall(taOverviewPrompt(p,S),run,taNormOverview),...jobs.map(j=>taCall(taBatchPrompt(p,S,j.a,j.b),run,r=>taNormBatch(r,j.a,j.b)))]);
+  if(run.ctl.signal.aborted){ d.status="stop"; return; }
+  if(!ov||bs.some(x=>!x)){ d.status="error"; return; }
+  d.ov=ov; d.items=bs.flat(); d.status="done";
+}
+async function taRun(onlyBad){
+  if(!sample){toast("이 페이지를 Claude 안에서 열어야 자료를 만들 수 있습니다.");return}
+  const run=state.ta.run;
+  if(!onlyBad){
+    const rows=filledRows("ta"); if(!rows.length){toast("지문을 넣어 주세요.");return}
+    state.taResult={kicker:state.ta.kicker,created:Date.now(),docs:rows.map((r,i)=>({n:i+1,no:(r.title||"").replace(/번$/,"").trim()||String(i+1),src:r.src||"",text:tidyBreaks(r.text),status:"wait"}))};
+    state.sub.ta="result"; renderView();
+  }
+  run.running=true; run.ctl=new AbortController(); taProg();
+  const queue=state.taResult.docs.filter(d=>d.status!=="done");
+  const worker=async()=>{ while(queue.length&&!run.ctl.signal.aborted){ const d=queue.shift(); try{ await taGen(d,run); }catch(e){ d.status="stop"; } taProg(); renderTaSheets(); } };
+  await Promise.all(Array.from({length:2},worker));
+  run.running=false; state.taResult.docs.forEach(d=>{ if(d.status==="wait"||d.status==="work") d.status="stop"; }); taProg(); renderTaSheets();
+  const ok=state.taResult.docs.filter(d=>d.status==="done").length; if(ok) toast(`정밀 분석서 ${ok}개를 만들었습니다.`);
+}
+function taChunk(c){ return esc(c).replace(/\s\/\s/g,' <i class="sl">/</i> '); }
+function buildTaPages(){
+  const res=state.taResult; if(!res) return [];
+  const docs=res.docs.filter(d=>d.status==="done"); if(!docs.length) return [];
+  const blocks=[], P=(cat,html,br)=>blocks.push({cat,html,br:!!br});
+  docs.forEach(d=>{
+    const nm=`${d.no}${/^\d/.test(d.no)?"번":""}`, o=d.ov;
+    P(nm,`<div class="ta-h"><b>${esc(nm)}</b><span>${esc(d.src||res.kicker||"")}${o.title_ko?` · ${esc(o.title_ko)}`:""}</span></div><div class="ta-box"><div><b>주제</b> ${esc(o.topic)}</div><div><b>요지</b> ${esc(o.gist)}</div><div class="ta-map"><b>논리 흐름</b> ${esc(o.logic_map)}</div></div>`,true);
+    P(nm,`<div class="ta-t">1. 전체 논리 패턴 · ${esc(o.pattern.name)}</div><p class="ta-p">${esc(o.pattern.def)}</p>${o.pattern.why_works?`<p class="ta-p"><b>독해 포인트</b> ${esc(o.pattern.why_works)}</p>`:""}`);
+    P(nm,`<div class="ta-t">2. 논리 단계 구조</div>`);
+    o.stages.forEach((x,i)=>P(nm,`<div class="ta-st"><span class="ta-n">${i+1}</span><div><b>${esc(x.label)}</b> <em>문장 ${esc(x.sents)}</em><br>${esc(x.func)}</div></div>`));
+    P(nm,`<div class="ta-t">3. 구체적 논리 패턴</div>`);
+    o.patterns.forEach(x=>P(nm,`<div class="ta-pt"><b>${esc(x.name)}</b> <em>문장 ${esc(x.sents)}</em>${x.signal?` <span class="ta-sg">신호: ${esc(x.signal)}</span>`:""}<br>${esc(x.detail)}</div>`));
+    if(o.signals.length) P(nm,`<div class="ta-t">4. 신호어·연결 표현</div><div class="ta-sig">${o.signals.map(x=>`<div><b>${esc(x.w)}</b> <em>${esc(x.at)}번</em> ${esc(x.fn)}</div>`).join("")}</div>`);
+    if(o.cohesion) P(nm,`<div class="ta-t">5. 응집 장치(지시어·반복·병렬)</div><p class="ta-p">${esc(o.cohesion)}</p>`);
+    if(o.pitfalls) P(nm,`<div class="ta-t">6. 학생이 흔히 하는 오해</div><p class="ta-p">${esc(o.pitfalls)}</p>`);
+    P(nm,`<div class="ta-t big">문장별 정밀 분석</div><div class="ta-note">연결 = 앞 문장과의 관계 · 논리 = 글 전체 속 역할 · 의미 = 속뜻·지시 대상 · 형태 = 구문·문법</div>`);
+    d.items.forEach(it=>P(nm,`<div class="ta-s"><div class="ta-sh"><b>${it.no}</b><span class="ta-role">${esc(it.role)}</span><span class="ta-rel">${it.rel.to?`↩ ${it.rel.to}번과 ${esc(it.rel.type)}`:`첫 문장 · ${esc(it.rel.type)}`}</span></div><div class="ta-en">${taChunk(it.chunk||d.sents[it.no-1])}</div><div class="ta-ko">${esc(it.ko)}</div><dl><dt>연결</dt><dd><span class="ta-dev">${esc(it.rel.device)}</span> ${esc(it.rel.why)}</dd><dt>논리</dt><dd>${esc(it.logic)}</dd><dt>의미</dt><dd>${esc(it.meaning)}</dd><dt>형태</dt><dd>${esc(it.form)}</dd></dl>${it.vocab.length?`<div class="ta-v">${it.vocab.map(v=>`<span><b>${esc(v.w)}</b> ${esc(v.m)}</span>`).join("")}</div>`:""}</div>`));
+    P(nm,`<div class="ta-t big">수업 준비</div>`);
+    if(o.teach.order.length) P(nm,`<div class="ta-t">추천 설명 순서</div><ol class="ta-ol">${o.teach.order.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`);
+    if(o.teach.hard.length) P(nm,`<div class="ta-t">학생이 어려워할 지점과 설명 팁</div><ul class="ta-ol">${o.teach.hard.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`);
+    if(o.teach.quiz.length) P(nm,`<div class="ta-t">변형문제 출제 포인트</div><ul class="ta-ol">${o.teach.quiz.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`);
+  });
+  return paginate(blocks,"q",{cls:"ta",brand:`교사용 정밀 분석${res.kicker?" · "+res.kicker:""}`});
+}
+async function renderTaSheets(){
+  const el=$("#ta-sheets"); if(!el) return; try{await document.fonts.ready}catch(e){}
+  const pages=buildTaPages();
+  if(!pages.length){el.innerHTML=`<div class="empty"><h3>${state.ta.run.running?"분석이 끝난 지문부터 조판됩니다":"아직 조판할 지문이 없습니다"}</h3><p>${state.ta.run.running?"잠시만 기다려 주세요.":"새로 만들기에서 지문을 넣어 주세요."}</p></div>`;return}
+  el.innerHTML=pages.map((p,i)=>`<div class="frame"><span class="pageno">${i+1} / ${pages.length}</span>${p}</div>`).join(""); fitScale("#ta-sheets");
+}
+
 /* ================= 리딩 플로우 (하위권 · 한글+영어 낱말 선지 20개 → 옳은 선지를 글 흐름 순서로 배열) ================= */
 const RF_CIRC=["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪","⑫","⑬","⑭","⑮","⑯","⑰","⑱","⑲","⑳"];
 state.rf=(()=>{ const d=LS.get("bj-rf-draft",null); return {kicker:(d&&d.kicker)||"", rows:(d&&d.rows)||[emptyRow()], savedAt:(d&&d.savedAt)||null, showPass:true, run:{running:false,done:0,total:0,ctl:null}}; })();
@@ -4351,7 +4531,7 @@ function pdfModalHTML(m){
 }
 /* drag events */
 let dragDepth=0;
-function dropKey(){ if(state.view==="rf"&&state.sub.rf==="new") return "rf"; if(state.view==="mt"&&state.sub.mt==="new") return "mt"; if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
+function dropKey(){ if(state.view==="ta"&&state.sub.ta==="new") return "ta"; if(state.view==="rf"&&state.sub.rf==="new") return "rf"; if(state.view==="mt"&&state.sub.mt==="new") return "mt"; if(state.view==="ps"&&state.sub.ps==="new") return "ps"; if(state.view==="cr"&&state.sub.cr==="new") return "cr"; if(state.view==="hs"&&state.sub.hs==="new") return "hs"; if(state.view==="exam"&&state.sub.exam==="new") return "exam"; if(state.view==="basic"&&state.sub.basic==="new") return "basic"; if(state.view==="wkbk"&&state.sub.wkbk==="new") return "wkbk"; if(state.view==="cls"&&state.sub.cls==="new") return "cls"; if(state.view==="ana"&&state.sub.ana==="new") return "ana"; if(state.view==="gen"&&state.sub.gen==="new") return "gen"; if(state.view==="lib"&&!state.bulk.running) return "lib"; return null; }
 document.addEventListener("dragenter",e=>{ if(!dropKey()||!e.dataTransfer||![...e.dataTransfer.types].includes("Files")) return; dragDepth++; document.body.classList.add("dragging"); });
 document.addEventListener("dragleave",e=>{ if(!dropKey()) return; dragDepth=Math.max(0,dragDepth-1); if(!dragDepth) document.body.classList.remove("dragging"); });
 document.addEventListener("dragover",e=>{ if(dropKey()&&e.dataTransfer&&[...e.dataTransfer.types].includes("Files")){ e.preventDefault(); e.dataTransfer.dropEffect="copy"; } });
@@ -8736,6 +8916,7 @@ const ICONS={
   cr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 3 5 13.500h6L10 21l8-10.500h-6z"/></svg>',
   hs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.500 5.500-1.500 8-.5V18c-2.500-1-5.500-1-8 .5-2.500-1.500-5.500-1.500-8-.5z"/><path d="M12 6v12.500"/></svg>',
   exam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>',
+  ta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M8.5 11h5M11 8.5v5"/></svg>',
   rf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="6" height="6" rx="1"/><rect x="15" y="14" width="6" height="6" rx="1"/><path d="M9 7h3a3 3 0 0 1 3 3v4"/></svg>',
   mt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M12 9h6M12 13h6M12 17h4"/></svg>',
   ps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
@@ -8748,11 +8929,11 @@ const ICONS={
   att:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M9 3v4M15 3v4M8 14.5l2 2 4-4"/></svg>',
   set:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>'
 };
-const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],mt:["학습","모의고사 회차"],rf:["학습","리딩 플로우"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
+const VIEWS={att:["관리","출석부"],log:["관리","수업 일지"],gen:["학습","변형문제"],ps:["학습","지문별 시험지"],mt:["학습","모의고사 회차"],rf:["학습","리딩 플로우"],ta:["학습","교사용 정밀 분석"],exam:["학습","중등 시험지"],cr:["학습","시험 직전 정리"],hs:["학습","고등 지문 분석"],tb:["학습","고등 교과서"],cls:["학습","수업용 자료"],wkbk:["학습","워크북"],basic:["학습","기초 워크북"],ana:["학습","지문 분석서"],mat:["학습","수업자료"],lib:["자료","원본 보관함"],notes:["자료","교정 노트"],set:["관리","설정"]};
 function renderNav(){
   const item=(v)=>`<button type="button" data-view="${v}"${state.view===v?' aria-current="page"':""}>${ICONS[v]}<span>${VIEWS[v][1]}</span>${v==="mat"&&state.materials.length?`<span class="badge">${state.materials.length}</span>`:v==="lib"?`<span class="badge">${allExams().length}</span>`:""}</button>`;
   const itemLv=lv=>`<button type="button" data-view="gen" data-level="${lv}"${state.view==="gen"&&state.level===lv?' aria-current="page"':""}>${ICONS.gen}<span>${lv==="mid"?"중등 변형문제":"고등 변형문제"}</span></button>`;
-  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("mt")}${item("rf")}${item("exam")}${item("cr")}${item("wkbk")}${item("tb")}${item("hs")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
+  $("#nav").innerHTML=`<h6>학습</h6>${itemLv("high")}${itemLv("mid")}${item("ps")}${item("mt")}${item("rf")}${item("ta")}${item("exam")}${item("cr")}${item("wkbk")}${item("tb")}${item("hs")}${item("mat")}<h6>자료</h6>${item("lib")}${item("notes")}<h6>관리</h6>${item("att")}${item("log")}${item("set")}`;
   const [g,n0]=VIEWS[state.view]; const n=state.view==="gen"?levelName()+" 변형문제":n0; $("#crumb").innerHTML=`${g}<i>/</i><b>${n}</b>`;
   $("#who").innerHTML=`<span>관리자</span><b>${esc(state.academy||"학원")}</b><span class="av">${esc((state.academy||"B").trim().charAt(0))}</span>`;
 }
@@ -8962,6 +9143,7 @@ function renderView(){
   else if(v==="ps") html=viewPs();
   else if(v==="mt") html=viewMt();
   else if(v==="rf") html=viewRf();
+  else if(v==="ta") html=viewTa();
   else if(v==="mat") html=viewMat();
   else if(v==="lib") html=`<div class="phead"><div><h1>원본 보관함</h1><p>모의고사 원본 지문을 연도별로 보관합니다. 변형문제·분석서의 '모의고사 지문 불러오기'에서 바로 씁니다.</p></div></div>`+renderLib();
   else if(v==="notes") html=`<div class="phead"><div><h1>교정 노트</h1></div></div><div style="max-width:980px">${renderLessons()}</div>`;
@@ -8973,6 +9155,7 @@ function renderView(){
   if(v==="ana"&&state.sub.ana==="new") renderAnaTally();
   if(v==="cls"){ if(state.sub.cls==="result"){renderClsProgress();renderClsSheets();} else renderClsTally(); }
   if(v==="wkbk"){ if(state.sub.wkbk==="result"){renderWkbkProgress();renderWkbkSheets();} else if(state.sub.wkbk==="words") renderWkbkWordSheets(); else renderWkbkTally(); }
+  if(v==="ta"){ if(state.sub.ta==="result"){taProg();renderTaSheets();} else taTally(); }
   if(v==="rf"){ if(state.sub.rf==="result"){rfProg();renderRfSheets();} else rfTally(); }
   if(v==="mt"){ if(state.sub.mt==="result"){renderProg();renderRunState();renderSheets();} else mtTally(); }
   if(v==="ps"){ if(state.sub.ps==="result"){renderProg();renderRunState();renderSheets();} else psTally(); }
@@ -9109,6 +9292,12 @@ document.addEventListener("click",async e=>{
   if(t.closest("#exam-print")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"q"),`${exTitle()} 문제지`);return}
   if(t.closest("#exam-printkey")){try{await document.fonts.ready}catch(_){} printPages(exPages(state.examResult,"a"),`${exTitle()} 정답 및 해설`);return}
   if(t.closest("#exam-save")){try{await document.fonts.ready}catch(_){} saveDoc(`${exTitle()} ${state.exam.tab==="a"?"정답 및 해설":"문제지"}`,exPages(state.examResult,state.exam.tab));return}
+  if(t.closest("#ta-run")){taRun();return}
+  if(t.closest("#ta-retry")){taRun(true);return}
+  if(t.closest("#ta-stop")){state.ta.run.ctl&&state.ta.run.ctl.abort();return}
+  if(t.closest("#ta-copy")){addRows("ta",filledRows("gen").map(r=>({...r})));return}
+  if(t.closest("#ta-print")){try{await document.fonts.ready}catch(_){} printPages(buildTaPages(),"교사용 정밀 분석");return}
+  if(t.closest("#ta-save")){try{await document.fonts.ready}catch(_){} saveDoc("교사용 정밀 분석",buildTaPages());return}
   if(t.closest("#rf-run")){rfRun();return}
   if(t.closest("#rf-retry")){rfRun(true);return}
   if(t.closest("#rf-stop")){state.rf.run.ctl&&state.rf.run.ctl.abort();return}
@@ -9194,6 +9383,7 @@ document.addEventListener("input",e=>{
   if(t.dataset.e2){state.exam[t.dataset.e2]=t.value;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500); const hp=$("#exam-headprev"); if(hp) hp.textContent=exHeadTitle(state.exam)||"(학교·시험 이름을 넣어 주세요)"; return}
   if(t.dataset.e2n){const v=Math.max(0,Math.min(20,parseInt(t.value,10)||0)); state.exam[t.dataset.e2n]=t.dataset.e2n==="maxPer"?Math.max(1,v):v; clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();return}
   if(t.dataset.exsc){const v=Math.max(1,Math.min(10,parseInt(t.value,10)||0)); if(v){state.exam.scores[t.dataset.exsc]=v;clearTimeout(draftT.exam);draftT.exam=setTimeout(exSaveDraft,500);renderExamTally();} return}
+  if(t.dataset.t2){state.ta[t.dataset.t2]=t.value;clearTimeout(draftT.ta);draftT.ta=setTimeout(()=>saveDraft("ta"),500);return}
   if(t.dataset.r2){state.rf[t.dataset.r2]=t.value;clearTimeout(draftT.rf);draftT.rf=setTimeout(()=>saveDraft("rf"),500);return}
   if(t.dataset.m2){state.mt[t.dataset.m2]=t.value;clearTimeout(draftT.mt);draftT.mt=setTimeout(()=>saveDraft("mt"),500);return}
   if(t.dataset.mtn){const lim=t.dataset.mtn==="sets"?[1,10]:[5,45]; state.mt[t.dataset.mtn]=Math.min(lim[1],Math.max(lim[0],parseInt(t.value)||lim[0])); LS.set("bj-mt-opts",{sets:state.mt.sets,per:state.mt.per}); mtTally(); return}
