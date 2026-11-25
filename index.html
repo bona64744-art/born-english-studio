@@ -1569,7 +1569,8 @@ const MID_HIDE = new Set(["implication","unanswerable","inference"]);
 function isMid(){return state.level==="mid"}
 function visT(t){ return t.lv==="mid" ? isMid() : !(isMid()&&MID_HIDE.has(t.id)); }
 const LB = ["ⓐ","ⓑ","ⓒ","ⓓ","ⓔ"];
-function useAbc(q){const t=T[q.type]; return !!(q&&q.lv==="mid"&&t&&["under","refmc","multi"].includes(t.kind))}
+const psFlags=new WeakMap();
+function useAbc(q){const t=T[q.type]; if(!(q&&t&&["under","refmc","multi"].includes(t.kind))) return false; const f=psFlags.get(q); return !!(q.lv==="mid"||(f&&f.abc))}
 const MID_DEFAULT = {"M|topic|en|하":1,"M|m_mood||하":1,"M|blank||하":1,"M|m_dlg||하":1,"M|mismatch|ko|하":1,"M|m_gram3||하":1,"M|m_gram_multi||하":1,"M|m_voc3||하":1,"M|m_fillw||하":1,"M|m_qa||하":1};
 function defaultCounts(){ const keep={}; Object.keys(state.counts||{}).forEach(k=>{const m=k.startsWith("M|"); if(isMid()?!m:m) keep[k]=state.counts[k]}); return isMid()?{...keep,...MID_DEFAULT}:{...keep,...DEFAULT_COUNTS}; }
 function levelName(l){return (l||state.level)==="mid"?"중등":"고등"}
@@ -1579,7 +1580,18 @@ const DEFAULT_COUNTS = {"topic|en|하":1,"summary||하":1,"blank||하":1,"blank|
 const LEGACY_Q = {blank_easy:["blank","하"],blank_hard:["blank","상"],match_easy:["match","하"],match_hard:["match","상"],mismatch_easy:["mismatch","하"],mismatch_hard:["mismatch","상"]};
 function normQ(q){ if(q&&LEGACY_Q[q.type]){const [t,l]=LEGACY_Q[q.type];q.type=t;q.level=l} return q; }
 const STEM_LEVEL = {match:{"상":"다음 글의 내용과 일치하거나 글에서 추론할 수 있는 것은?"},mismatch:{"상":"다음 글의 내용과 일치하지 않거나 글에서 추론할 수 없는 것은?"}};
+function psStem(q){
+  switch(q.type){
+    case "blank": return "윗글의 빈칸에 들어갈 말로 가장 적절한 것은?";
+    case "implication": return "윗글의 밑줄 친 (가)가 의미하는 바로 가장 적절한 것은?";
+    case "grammar_wrong": return "윗글의 밑줄 친 ⓐ~ⓔ 중, 어법상 틀린 것은?";
+    case "vocab_wrong": return "윗글의 밑줄 친 ①~⑤ 중, 문맥상 낱말의 쓰임이 적절하지 않은 것은?";
+  }
+  return null;
+}
 function stemOf(q){
+  const pf=psFlags.get(q);
+  if(pf&&pf.shared){ const fixed=psStem(q); if(fixed) return fixed; let st=(STEM_LEVEL[q.type]&&STEM_LEVEL[q.type][q.level])||T[q.type].stem; return st.replace(/다음 글/g,"윗글"); }
   let st=(STEM_LEVEL[q.type]&&STEM_LEVEL[q.type][q.level])||T[q.type].stem;
   if(q.lv==="mid"&&T[q.type].kind==="under") st=st.replace("밑줄 친 부분 중,","밑줄 친 ⓐ~ⓔ 중,");
   return st;
@@ -2508,7 +2520,7 @@ ${passageHeader(p)}
 
 ${extrasFor(p,types)}
 
-[만들 유형] 아래 줄마다 정확히 1문항씩, 적힌 순서대로 만드세요. 같은 유형이 하·상으로 나오면 두 문항의 난이도 차이가 분명해야 하고, 같은 유형·난이도가 여러 줄이면 서로 다른 문항(다른 정답 근거, 다른 밑줄·빈칸 위치, 다른 선택지)으로 만드세요. questions 배열은 줄 순서와 같아야 합니다.
+${sharedNote(p,types)}[만들 유형] 아래 줄마다 정확히 1문항씩, 적힌 순서대로 만드세요. 같은 유형이 하·상으로 나오면 두 문항의 난이도 차이가 분명해야 하고, 같은 유형·난이도가 여러 줄이면 서로 다른 문항(다른 정답 근거, 다른 밑줄·빈칸 위치, 다른 선택지)으로 만드세요. questions 배열은 줄 순서와 같아야 합니다.
 ${types.map((t,i)=>`- #${i} ${itemLine(t)} (${t.name}): ${ruleFor(t)}`).join("\n")}
 
 [공통 원칙]
@@ -2535,6 +2547,11 @@ ${SELF_CHECK}
 [출력] 설명이나 코드 블록 없이 JSON 하나만 출력하세요: {"questions":[ ... ]}
 유형별 객체 형태:
 ${types.map(t=>shapeFor(t)).join("\n")}`;
+}
+function sharedNote(p,types){
+  if(!p.psShared) return "";
+  const emb=types.filter(t=>PS_EMB.has(t.id)); if(!emb.length) return "";
+  return `[한 지문에 함께 표시] 이 지문은 시험지에 한 번만 인쇄되고, 아래 문항들의 밑줄·번호·빈칸이 그 한 지문 안에 함께 표시됩니다. 문항마다 지문을 다시 쓰지 않습니다. 그래서 ${emb.length>1?"문항마다 고른 위치(어법 ⓐ~ⓔ 밑줄, 어휘 ①~⑤ 밑줄, 빈칸, 함축 밑줄)가 서로 한 글자도 겹치지 않아야 하고, ":""}밑줄 하나는 1~4단어의 짧은 구간으로 잡으며, 위치는 지문 앞·중간·뒤에 고르게 퍼뜨리세요. 서로 다른 두 구간 사이에는 최소 한 단어를 남깁니다. 각 문항의 passage에는 그 문항의 표기만 넣고, 다른 문항의 표기는 넣지 않습니다.\n\n`;
 }
 function stripQ(q){const c={...q};["orig","src","uid","audit","ok","seq"].forEach(k=>delete c[k]);return c}
 function proofPrompt(p,types,qs,local,repair){
@@ -2811,7 +2828,7 @@ function qHTML(q,n,opt){
   const t=T[q.type]; let b=""; const np=!!(opt&&opt.noPass);
   switch(t.kind){
     case "mc": b=`${np?"":`<div class="q-passage">${inline(q.orig)}</div>`}${optsHTML(q.options,isKoOpts(q))}`;break;
-    case "blank": case "implication": b=`<div class="q-passage">${marked(q.passage)}</div>${optsHTML(q.options,false)}`;break;
+    case "blank": case "implication": b=`${np?"":`<div class="q-passage">${marked(q.passage)}</div>`}${optsHTML(q.options,false)}`;break;
     case "summary":{
       const s=esc(q.summary).replace(/\(A\)/,'<span class="sb">(A)</span>').replace(/\(B\)/,'<span class="sb">(B)</span>');
       b=`${np?"":`<div class="q-passage">${inline(q.orig)}</div><div class="q-arrow">↓</div>`}<div class="q-sum">${s}</div>
@@ -2828,7 +2845,7 @@ function qHTML(q,n,opt){
       else b=`<div class="q-passage">${inline(q.orig)}</div><div class="q-given">${esc(q.definition||"")}${String(q.answer||"").trim()?` <span class="hintl">(${esc(String(q.answer).trim().charAt(0).toLowerCase())}로 시작)</span>`:""}</div><div class="alines"><i></i></div>`;
       break;}
     case "under": case "fix": case "form":
-      b=`<div class="q-passage">${marked(q.passage,useAbc(q))}</div>`;
+      b=(np&&t.kind==="under")?"":`<div class="q-passage">${marked(q.passage,useAbc(q))}</div>`;
       if(t.kind==="under"&&useAbc(q)) b+=`<div class="ogrid abc">${LB.map((l,i)=>`<span><span class="cn">${CN[i]}</span> ${l}</span>`).join("")}</div>`;
       if(t.kind==="fix") b+=`<div class="wlines">${["a","b","c"].map(x=>`<div><span>(${x})</span><i></i><em>→</em><i></i></div>`).join("")}</div>`;
       if(t.kind==="form") b+=`<div class="wlines">${["a","b","c"].map(x=>`<div class="one"><span>(${x})</span><i></i></div>`).join("")}</div>`;
@@ -2863,6 +2880,7 @@ function writeAnswer(q){const t=T[q.type];
 function aHTML(q,n){
   const t=T[q.type]; let ex=esc(q.explanation||"");
   if(t.kind==="order"){const seq=q.seq||ORDER_OPTS[0]; ex=ex.replace(/\{P([123])\}/g,(a,k)=>`(${seq[k-1]})`);}
+  if(t.kind==="under"&&useAbc(q)&&!(q.lv==="mid")) ex=ex.replace(/[①②③④⑤]/g,c=>LB[CN.indexOf(c)]);
   let body=`<p>${skyTag(ex)}</p>`;
   if(t.kind==="summary"&&q.summary_ko) body+=`<p class="sub">요약문 해석: ${esc(q.summary_ko)}</p>`;
   if(t.kind==="order") body+=`<p class="sub">정답 순서: ${(q.seq||ORDER_OPTS[0]).map(x=>`(${x})`).join(" - ")}</p>`;
@@ -4326,18 +4344,78 @@ function psRun(){
   const stamp=Date.now().toString(36);
   const units=[]; rows.forEach((r,i)=>{
     const P={key:"ps"+i+"_"+stamp,grade:/[고중][123]/.exec(r.src||"")?.[0]||"",no:(r.title||"").replace(/번$/,"")||String(i+1),exam:r.src||state.ps.kicker||"지문",text:tidyBreaks(r.text),kind:"",lvl:"high"};
-    P.parts=[P.text]; chunk(items,3).forEach((g,gi)=>units.push({id:P.key+"-"+gi,p:{...P},types:g,status:"wait",questions:[]}));
+    P.parts=[P.text]; P.psShared=true;
+    const emb=items.filter(t=>PS_EMB.has(t.id)), rest=items.filter(t=>!PS_EMB.has(t.id));
+    [...(emb.length?[emb]:[]),...chunk(rest,3)].forEach((g,gi)=>units.push({id:P.key+"-"+gi,p:{...P},types:g,status:"wait",questions:[]}));
   });
   state.units=units;
   state.set={title:(state.ps.kicker||"").trim()||"지문별 시험지",demo:false,questions:[],created:Date.now(),total:units.reduce((a,u)=>a+u.types.length,0),level:"high",mode:"ps"};
   state.sub.ps="result"; renderView();
   runUnits(units);
 }
+const PS_EMB=new Set(["blank","implication","grammar_wrong","vocab_wrong"]);
+function psCompact(x){
+  x=String(x); let c="",map=[];
+  for(let i=0;i<x.length;i++){ const ch=x[i]; if(/\s/.test(ch)) continue; c+=ch.replace(/[’‘]/g,"'").replace(/[“”]/g,'"'); map.push(i); }
+  return {c,map};
+}
+/* 문항의 표기([[1:..]] [[BLANK]] [[U:..]])가 원문 어디에 해당하는지 찾는다. 못 찾으면 null */
+function psSpans(q){
+  const orig=String(q.orig||""), raw=String(q.passage||""); if(!raw||!orig) return null;
+  const O=psCompact(orig), parts=[]; let last=0,m; MARK_RE.lastIndex=0;
+  while((m=MARK_RE.exec(raw))){ parts.push({p:raw.slice(last,m.index)}); parts.push({id:m[1]||"BLANK",text:m[2]||""}); last=MARK_RE.lastIndex; }
+  parts.push({p:raw.slice(last)});
+  if(parts.length<3) return null;
+  const spans=[]; let cur=0;
+  for(let i=0;i<parts.length;i++){
+    const pt=parts[i];
+    if(pt.p===undefined){ spans.push({id:pt.id,text:pt.text,s:cur,e:cur}); continue; }
+    const pc=psCompact(pt.p).c;
+    if(i===0){ if(O.c.slice(0,pc.length)!==pc) return null; cur=pc.length; continue; }
+    const prev=spans[spans.length-1];
+    if(i===parts.length-1){ if(pc.length&&!O.c.endsWith(pc)) return null; prev.e=O.c.length-pc.length; continue; }
+    const want=psCompact(prev.text).c.length;
+    if(!pc){ prev.e=Math.min(O.c.length,prev.s+want); cur=prev.e; continue; }
+    let best=-1,bd=1e9;
+    for(let k=O.c.indexOf(pc,prev.s),n=0;k>=0&&n<80;k=O.c.indexOf(pc,k+1),n++){
+      const d=Math.abs((k-prev.s)-want); if(d<bd){bd=d;best=k}
+      if(k-prev.s>want+60) break;
+    }
+    if(best<0) return null; prev.e=best; cur=best+pc.length;
+  }
+  for(let i=0;i<spans.length;i++){ const a=spans[i]; if(!(a.e>a.s)||(i&&a.s<spans[i-1].e)) return null; }
+  return spans.map(a=>({id:a.id,text:a.text,s:O.map[a.s],e:O.map[a.e-1]+1}));
+}
+/* 한 지문 안에 어법·어휘·빈칸·함축 표기를 함께 넣는다. 겹치거나 못 찾은 문항은 자기 지문을 따로 인쇄한다 */
+function psMerge(g){
+  const orig=String(g.orig||"");
+  const cand=g.qs.filter(q=>PS_EMB.has(q.type)).sort((a,b)=>PS_ORDER.indexOf(a.type)-PS_ORDER.indexOf(b.type));
+  const taken=[], ok=new Set();
+  cand.forEach(q=>{
+    const sp=psSpans(q); if(!sp) return;
+    if(sp.some(a=>taken.some(b=>a.s<b.e&&b.s<a.e))) return;
+    sp.forEach(a=>taken.push({...a,q})); ok.add(q);
+  });
+  taken.sort((a,b)=>a.s-b.s);
+  const plain=x=>esc(x).replace(/\n{2,}/g,"<br>").replace(/\n/g,"<br>");
+  const disp=a=>{
+    const q=a.q;
+    if(q.type==="blank") return `<span class="blank"></span>`;
+    if(q.type==="implication") return `<span class="lt">(가)</span><u>${esc(a.text)}</u>`;
+    const n=+a.id; const lb=q.type==="grammar_wrong"?LB:CN;
+    return `<span class="mk"><span class="cn">${lb[n-1]||""}</span></span><u>${esc(a.text)}</u>`;
+  };
+  let html="",pos=0;
+  taken.forEach(a=>{ html+=plain(orig.slice(pos,a.s))+disp(a); pos=a.e; });
+  html+=plain(orig.slice(pos));
+  g.qs.forEach(q=>{ psFlags.set(q,{shared:!PS_EMB.has(q.type)||ok.has(q),abc:q.type==="grammar_wrong"&&ok.has(q)}); });
+  return {html,ok};
+}
 function psGroups(){
   const qs=((state.set&&state.set.questions)||[]).filter(q=>q.ok&&T[q.type]);
   const order=[], map=new Map();
   qs.forEach(q=>{ const k=q.src.exam+"|"+q.src.no; if(!map.has(k)){map.set(k,{key:k,no:q.src.no,exam:q.src.exam,orig:q.orig,qs:[]}); order.push(k);} map.get(k).qs.push(q); });
-  return order.map(k=>{ const g=map.get(k); g.qs.sort((a,b)=>PS_ORDER.indexOf(a.type)-PS_ORDER.indexOf(b.type)); return g; });
+  return order.map(k=>{ const g=map.get(k); g.qs.sort((a,b)=>PS_ORDER.indexOf(a.type)-PS_ORDER.indexOf(b.type)); g.mg=psMerge(g); return g; });
 }
 function buildPsPages(kind){
   const gs=psGroups(); if(!gs.length) return [];
@@ -4345,8 +4423,8 @@ function buildPsPages(kind){
   gs.forEach(g=>{
     const list=g.qs.map((q,i)=>({q,n:i+1}));
     if(kind==="q"){
-      blocks.push({br:true,cat:numTxt(g),html:`<div class="ps-pass"><div class="ps-h"><b>${esc(numTxt(g))}</b><span>${esc(g.exam||"")}</span></div><div class="ps-i">다음 글을 읽고 물음에 답하시오.</div><div class="q-passage">${inline(g.orig||"")}</div></div>`});
-      list.forEach(x=>blocks.push({cat:numTxt(g),html:qHTML(x.q,x.n,{noPass:true})}));
+      blocks.push({br:true,cat:numTxt(g),html:`<div class="ps-pass"><div class="ps-h"><b>${esc(numTxt(g))}</b><span>${esc(g.exam||"")}</span></div><div class="ps-i">다음 글을 읽고 물음에 답하시오.</div><div class="q-passage">${g.mg.html}</div></div>`});
+      list.forEach(x=>blocks.push({cat:numTxt(g),html:qHTML(x.q,x.n,{noPass:!PS_EMB.has(x.q.type)||g.mg.ok.has(x.q)})}));
     } else {
       blocks.push({br:true,cat:numTxt(g),html:`<div class="ps-h"><b>${esc(numTxt(g))}</b><span>${esc(g.exam||"")} · 정답 및 해설</span></div>`});
       keyHTML(list).forEach(b=>blocks.push({cat:numTxt(g),html:b.html}));
