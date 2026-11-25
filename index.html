@@ -1895,9 +1895,9 @@ function renderModal(){
 /* ================= materials (수업자료) ================= */
 function packSet(set){
   const passages={}; const qs=set.questions.map(q=>{const k=`${q.src.exam}|${q.src.no}`; passages[k]=q.orig; const c={...q}; delete c.orig; c._p=k; return c;});
-  return {title:set.title,level:set.level||"high",created:set.created||Date.now(),passages,questions:qs,quiz:set.quiz||null,quizGroups:set.quizGroups||null};
+  return {title:set.title,level:set.level||"high",created:set.created||Date.now(),passages,questions:qs,quiz:set.quiz||null,quizGroups:set.quizGroups||null,mode:set.mode||null};
 }
-function unpackSet(d){return {title:d.title,level:d.level||"high",created:d.created,demo:false,quiz:d.quiz||null,quizGroups:d.quizGroups||null,questions:d.questions.map(q=>{const c={...q,orig:d.passages[q._p]||""};delete c._p;normQ(c);return c})}}
+function unpackSet(d){return {title:d.title,level:d.level||"high",created:d.created,demo:false,mode:d.mode||undefined,quiz:d.quiz||null,quizGroups:d.quizGroups||null,questions:d.questions.map(q=>{const c={...q,orig:d.passages[q._p]||""};delete c._p;normQ(c);return c})}}
 /* ---- 수업자료 저장: 서버 저장이 늦거나 실패해도 이 기기에는 반드시 남기고, 목록에서 사라지지 않게 한다 ---- */
 const MAT_OV={}; /* 이름·폴더 변경은 서버 반영 전에도 화면에 바로 유지 */
 const MAT_DEL=new Set();
@@ -3332,11 +3332,11 @@ async function runUnits(units){
     if(m){
       const packed=packSet(state.set); packed.total=state.set.total; packed.spec=m.data&&m.data.spec;
       await updateMaterial(m,{data:packed,count:qs.filter(q=>q.ok).length,status:"done"});
-      if(qs.some(q=>q.ok)) toast("수업자료 › 변형문제에 저장했습니다.");
+      if(qs.some(q=>q.ok)) toast(state.set.mode==="ps"?"수업자료 › 지문별 시험지에 저장했습니다.":"수업자료 › 변형문제에 저장했습니다.");
     }
   } else if(qs.some(q=>q.ok)){
     const m=await saveMaterial("variant",state.set.title,packSet(state.set));
-    if(m){ state.set.materialId=m.id; toast("수업자료 › 변형문제에 저장했습니다."); }
+    if(m){ state.set.materialId=m.id; toast(state.set.mode==="ps"?"수업자료 › 지문별 시험지에 저장했습니다.":"수업자료 › 변형문제에 저장했습니다."); }
   }
 }
 async function persistDraftMaterial(){
@@ -3383,9 +3383,9 @@ function startRun(){
   state.sub.gen="result"; renderView();
   createDraftMaterial(total).then(()=>runUnits(state.units));
 }
-async function createDraftMaterial(total){
-  const spec={rows: filledRows("gen").map(r=>({...r})), counts:{...state.counts}, srcMode:state.srcMode, bookSplit:state.bookSplit};
-  const packed={title:state.set.title,level:state.level,created:state.set.created,passages:{},questions:[],total,spec};
+async function createDraftMaterial(total,mode){
+  const spec=mode==="ps"?undefined:{rows: filledRows("gen").map(r=>({...r})), counts:{...state.counts}, srcMode:state.srcMode, bookSplit:state.bookSplit};
+  const packed={title:state.set.title,level:state.level,created:state.set.created,passages:{},questions:[],total,spec,mode:mode||null};
   try{
     const m=await saveMaterial("variant",state.set.title,packed);
     if(m){ state.set.materialId=m.id; await updateMaterial(m,{status:"processing"}); renderView(); }
@@ -4351,7 +4351,7 @@ function psRun(){
   state.units=units;
   state.set={title:(state.ps.kicker||"").trim()||"지문별 시험지",demo:false,questions:[],created:Date.now(),total:units.reduce((a,u)=>a+u.types.length,0),level:"high",mode:"ps"};
   state.sub.ps="result"; renderView();
-  runUnits(units);
+  createDraftMaterial(state.set.total,"ps").then(()=>runUnits(units));
 }
 const PS_EMB=new Set(["blank","implication","grammar_wrong","vocab_wrong"]);
 function psCompact(x){
@@ -9699,6 +9699,15 @@ function viewAna(){
     <div class="runbar"><div class="tally" id="ana-tally"></div><span class="spacer"></span><button class="btn primary big" type="button" id="ana-run">분석서 만들기</button></div>
   </div>`;
 }
+/* 지문별 시험지 판별: 저장된 mode, 없으면(이전에 저장된 것) 지문마다 유형이 겹치지 않고 같은 구성인지로 추정 */
+function psMat(m){
+  if(!m||m.kind!=="variant"||!m.data) return false;
+  if(m.data.mode==="ps") return true;
+  const qs=m.data.questions||[]; if(qs.length<4||m.data.mode) return false;
+  const by={}; qs.forEach(q=>{(by[q._p]=by[q._p]||[]).push(q.type)});
+  const sets=Object.values(by); const sz=sets[0].length;
+  return sets.every(a=>a.length===sz&&new Set(a).size===a.length&&a.every(x=>PS_ORDER.includes(x)))&&sz>=4&&(m.title||"").includes("지문별")||false;
+}
 function matKindLabel(k){return ({variant:"변형문제",analysis:"지문 분석서","class":"수업용 자료",workbook:"워크북",basic:"기초 워크북",exam:"중등 시험지",hs:"고등 지문 분석",tb:"고등 교과서",cr:"시험 직전 정리"})[k]||k}
 function matSummary(m){
   if(m.kind==="variant"){
@@ -9714,17 +9723,18 @@ function matSummary(m){
 function viewMat(){
   const q=(state.matQ||"").trim().toLowerCase();
   const all=state.materials.slice().sort((a,b)=>b.created-a.created);
-  const byKind=state.matKind==="all"?all:all.filter(m=>m.kind===state.matKind);
+  const inKind=(m,k)=>k==="all"||(k==="ps"?psMat(m):k==="variant"?(m.kind==="variant"&&!psMat(m)):m.kind===k);
+  const byKind=all.filter(m=>inKind(m,state.matKind));
   const folders=[...new Set(all.map(m=>m.folder||"기본 폴더"))];
   const shown=byKind.filter(m=>(state.matFolder==="all"||(m.folder||"기본 폴더")===state.matFolder)&&(!q||String(m.title||"").toLowerCase().includes(q)));
   const f=(k,l,n)=>`<button type="button" class="f" data-folder="${esc(k)}" aria-pressed="${state.matFolder===k}"><span>${esc(l)}</span><span>${n}</span></button>`;
-  const tabs=[["all","전체"],["variant","변형문제"],["analysis","분석서"],["class","수업용 자료"],["workbook","워크북"],["basic","기초 워크북"],["exam","중등 시험지"],["cr","시험 직전 정리"],["hs","고등 지문 분석"],["tb","고등 교과서"]];
+  const tabs=[["all","전체"],["variant","변형문제"],["ps","지문별 시험지"],["analysis","분석서"],["class","수업용 자료"],["workbook","워크북"],["basic","기초 워크북"],["exam","중등 시험지"],["cr","시험 직전 정리"],["hs","고등 지문 분석"],["tb","고등 교과서"]];
   return `<div class="phead"><div><h1>수업자료</h1><p>그동안 만든 변형문제, 분석서, 수업용 자료가 모두 여기에 남습니다. ${db?"이 페이지를 쓰는 선생님들과 함께 봅니다.":"지금은 이 브라우저에만 저장됩니다."}</p></div></div>
   <div class="mat"><aside class="folders"><h4>자료함 폴더 ${folders.length}</h4>${f("all","전체",all.length)}${folders.map(x=>f(x,x,all.filter(m=>(m.folder||"기본 폴더")===x).length)).join("")}</aside>
-  <section class="card"><div class="mtabs">${tabs.map(([k,l])=>`<button type="button" data-mkind="${k}" aria-selected="${state.matKind===k}">${l}${k!=="all"?` <span style="color:var(--faint);font-size:11.5px">${all.filter(m=>m.kind===k).length}</span>`:""}</button>`).join("")}</div>
+  <section class="card"><div class="mtabs">${tabs.map(([k,l])=>`<button type="button" data-mkind="${k}" aria-selected="${state.matKind===k}">${l}${k!=="all"?` <span style="color:var(--faint);font-size:11.5px">${all.filter(m=>inKind(m,k)).length}</span>`:""}</button>`).join("")}</div>
     <div class="row" style="margin-bottom:12px;gap:10px"><input class="inp" id="mat-q" value="${esc(state.matQ||"")}" placeholder="자료 이름으로 찾기" style="max-width:260px"><span class="hint" style="margin:0">자료 ${shown.length}개</span><span class="spacer" style="flex:1"></span><button class="btn violet" type="button" data-view="gen">+ 새 자료 만들기</button></div>
     ${shown.length?`<div class="mlist">${shown.map(m=>`<div class="mrow"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg>
-      <div style="min-width:0"><b>${esc(m.title)}</b><span class="kindchip">${matKindLabel(m.kind)}</span>${m.kind==="variant"&&m.data&&m.data.level==="mid"?`<span class="kindchip">중등</span>`:""}<small>${esc(matSummary(m))} · ${esc(m.folder||"기본 폴더")} · ${fmtTime(m.created)}</small></div>
+      <div style="min-width:0"><b>${esc(m.title)}</b><span class="kindchip">${psMat(m)?"지문별 시험지":matKindLabel(m.kind)}</span>${m.kind==="variant"&&m.data&&m.data.level==="mid"?`<span class="kindchip">중등</span>`:""}<small>${esc(matSummary(m))} · ${esc(m.folder||"기본 폴더")} · ${fmtTime(m.created)}</small></div>
       <div class="acts"><button class="link" type="button" data-mopen="${m.id}">열기</button>${m.kind==="variant"?`<button class="link" type="button" data-mprint="${m.id}">문제지 인쇄</button>`:""}<button class="link" type="button" data-mren="${m.id}">이름</button><button class="link" type="button" data-mmove="${m.id}">폴더</button><button class="link danger" type="button" data-mdel="${m.id}">삭제</button></div></div>`).join("")}</div>`
       :`<div class="empty" style="margin:30px auto"><h3>${q?"찾는 자료가 없습니다":"아직 자료가 없습니다"}</h3><p>${q?"다른 이름으로 찾아보세요.":"변형문제, 분석서, 수업용 자료를 만들면 여기에 자동으로 저장됩니다."}</p></div>`}
   </section></div>`;
@@ -9951,9 +9961,11 @@ document.addEventListener("click",async e=>{
   const mf=t.closest("[data-folder]"); if(mf){state.matFolder=mf.dataset.folder;renderView();return}
   const mp=t.closest("[data-mprint]"); if(mp){const m=state.materials.find(x=>x.id===mp.dataset.mprint); if(!m) return;
     state.set=unpackSet(m.data); state.set.title=m.title; state.set.materialId=m.id; state.units=[];
+    if(psMat(m)){ state.set.mode="ps"; try{await document.fonts.ready}catch(_){} printPages(buildPsPages("q"),`${m.title} 문제지`); return }
     printKind("q"); return}
   const mo=t.closest("[data-mopen]"); if(mo){const m=state.materials.find(x=>x.id===mo.dataset.mopen); if(!m) return;
-    if(m.kind==="variant"){switchLevel(m.data&&m.data.level==="mid"?"mid":"high");state.set=unpackSet(m.data);state.set.title=m.title;state.set.materialId=m.id;state.units=[];state.view="gen";state.sub.gen="result";state.tab="q";}
+    if(psMat(m)){switchLevel("high");state.set=unpackSet(m.data);state.set.mode="ps";state.set.title=m.title;state.set.materialId=m.id;state.units=[];state.view="ps";state.sub.ps="result";state.tab="q";}
+    else if(m.kind==="variant"){switchLevel(m.data&&m.data.level==="mid"?"mid":"high");state.set=unpackSet(m.data);state.set.title=m.title;state.set.materialId=m.id;state.units=[];state.view="gen";state.sub.gen="result";state.tab="q";}
     else if(m.kind==="class"){state.clsResult=m.data;state.view="cls";state.sub.cls="result";}
     else if(m.kind==="workbook"){state.wkbkResult=m.data;state.view="wkbk";state.sub.wkbk="result";}
     else if(m.kind==="basic"){state.basicResult=m.data;state.view="basic";state.sub.basic="result";}
