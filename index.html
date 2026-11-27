@@ -2576,7 +2576,7 @@ ${types.map((t,i)=>`- #${i} ${itemLine(t)} (${t.name}): ${ruleFor(t)}`).join("\n
 5. explanation은 한국어로 아래 [해설 작성 기준]의 구조와 분량을 따릅니다. 선택지형(mc, summary, blank, implication)의 해설에는 ①~⑤ 같은 선택지 번호를 쓰지 마세요(프로그램이 선택지를 섞습니다).
 6. 서술형(fix, form, transform, arrange, compose)은 지문에 실제로 들어 있는 주요 문법·구문만 대상으로 합니다. 문법 포인트가 없는 평범한 문장으로는 만들지 말고, 지문에서 가장 시험에 나올 만한 문장을 고르세요. 어느 문법인지 explanation 첫 문장에 밝히고 SKY 단원 번호를 [SKY Unit NN] 형식으로 붙입니다. 서술형 정답은 원문 표현과 정확히 같아야 합니다.
 7. notes는 선택지(또는 밑줄)마다 한국어 설명입니다. 영어 선택지면 정확한 우리말 해석, 한국어 선택지면 본문 근거.
-8. 교과서·외부 지문은 문항에 실리는 지문이 영어 단어 140~160개여야 합니다. 위 [지문]은 이미 그 길이로 잘려 있으니 그대로 쓰고, 늘리거나 새 문장을 덧붙이거나 줄이지 마세요. 원문 전체가 문항에 들어가야 하는 것은 아닙니다.
+8. 교과서·외부 지문은 문항에 실리는 지문이 영어 단어 ${SPLIT_MIN}~${SPLIT_MAX}개여야 하며 ${SPLIT_MAX}개를 절대 넘지 않습니다. 위 [지문]은 이미 그 길이로 잘려 있으니 그대로 쓰고, 늘리거나 새 문장을 덧붙이거나 줄이지 마세요. 원문 전체가 문항에 들어가야 하는 것은 아닙니다.
 
 ${explGuide(types)}
 
@@ -6185,8 +6185,8 @@ const QUIZ_CSS=`
 .qz-foot img{height:26px;opacity:.8}`;
 
 /* ================= 긴 교과서 지문을 모의고사 길이로 나누기 ================= */
-let SPLIT_TARGET=150, SPLIT_MIN=140, SPLIT_MAX=160;
-function applyLevelConsts(){ if(isMid()){SPLIT_TARGET=110;SPLIT_MIN=90;SPLIT_MAX=130}else{SPLIT_TARGET=150;SPLIT_MIN=140;SPLIT_MAX=160} } /* 교과서·외부 지문: 한 문제에 쓰는 지문은 영어 단어 140~160개 */
+let SPLIT_TARGET=155, SPLIT_MIN=140, SPLIT_MAX=170;
+function applyLevelConsts(){ if(isMid()){SPLIT_TARGET=110;SPLIT_MIN=90;SPLIT_MAX=130}else{SPLIT_TARGET=155;SPLIT_MIN=140;SPLIT_MAX=170} } /* 교과서·외부 지문: 한 문제에 쓰는 지문은 영어 단어 140~160개 */
 state.splitLong = LS.get("bj-split-long",true);
 /* 문장 중간에서 잘린 줄바꿈을 없애고, 인사말·서명·문단 구분만 남긴다 */
 const SPK=/^[A-Z][A-Za-z.']{0,14}(?: [A-Z][A-Za-z.']{0,14})?\s?:\s/;
@@ -6227,13 +6227,13 @@ function splitLongPassage(text){
   });
   const join=(arr)=>arr.map((k,i)=>(i?(k.np?"\n\n":" "):"")+k.t).join("").trim();
   const pickEnd=(from,dir)=>{ /* 140~160단어 안에서 150에 가장 가까운 끝을 고른다 */
-    let c=0, best=-1, bd=1e9;
+    let c=0, best=-1, bd=1e9, over=-1;
     for(let j=from;dir>0?j<toks.length:j>=0;j+=dir){
       c+=toks[j].w;
-      if(c>=MIN-10){ const d=Math.abs(c-AIM)+(c>MAX||c<MIN?30:0); if(d<bd){bd=d;best=j} }
-      if(c>MAX+12) break;
+      if(c>MAX){ if(best<0) over=j; break; } /* 상한(MAX)을 넘는 끝은 고르지 않는다 */
+      if(c>=MIN-10){ const d=Math.abs(c-AIM)+(c<MIN?30:0); if(d<bd){bd=d;best=j} }
     }
-    return best;
+    return best>=0?best:over; /* 한 문장이 상한을 넘는 경우에만 어쩔 수 없이 넘김 */
   };
   const out=[]; let i=0;
   while(i<toks.length){
